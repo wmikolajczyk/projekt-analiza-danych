@@ -9,3 +9,18 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+### Wykorzystane biblioteki
+```{r load libraries, message=FALSE}
+library(dplyr)
+library(ggplot2)
+```
+
+### Wczytanie danych z pliku
+```{r load data, cache=TRUE}
+data <- read.csv('elektrownie.csv')
+```
+
+### Krótkie podsumowanie danych w zbiorze
+```{r short datasummary}
+summary(data)
+```
