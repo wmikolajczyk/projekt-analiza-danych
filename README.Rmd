@@ -2,7 +2,7 @@
 title: "Projekt analiza danych"
 author: "Wojciech Mikołajczyk"
 date: "December 2, 2017"
-output: html_document
+output: github_document
 ---
 
 ```{r setup, include=FALSE}
