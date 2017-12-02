@@ -141,7 +141,9 @@ nrow(data)
 
 ##### Korelacja między zmiennymi
 
-Odfiltrowanie daty, aby zostały same numeryczne wartości Macierz korelacji jest symetryczna, więc dla czytelności usuwamy górny trójkąt
+Odfiltrowanie daty, aby zostały same numeryczne wartości
+
+Macierz korelacji jest symetryczna, więc dla czytelności usuwamy górny trójkąt
 
 ``` r
 data <- data[, !(names(data) %in% 'data')]
