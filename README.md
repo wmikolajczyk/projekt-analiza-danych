@@ -145,9 +145,9 @@ Odfiltrowanie daty, aby zostały same numeryczne wartości
 
 ``` r
 data <- data[, !(names(data) %in% 'data')]
-correlations <- cor(data)
-correlations_melt <- arrange(melt(correlations), -abs(value))
-ggplot(correlations_melt, aes(x=Var1, y=Var2, colour=value)) + geom_point()
+correlations <- round(cor(data), 2)
+correlations_melt <- melt(correlations)
+ggplot(data = correlations_melt, aes(x=Var1, y=Var2, fill=value)) + geom_tile()
 ```
 
 ![](README_files/figure-markdown_github/unnamed-chunk-2-1.png)
