@@ -8,6 +8,8 @@ December 2, 2017
 ``` r
 library(dplyr)
 library(ggplot2)
+library(reshape2)
+library(caret)
 ```
 
 ### Wczytanie danych z pliku
@@ -17,6 +19,8 @@ data <- read.csv('elektrownie.csv')
 ```
 
 ### Krótkie podsumowanie danych w zbiorze
+
+##### Podstawowe statystyki
 
 ``` r
 summary(data)
@@ -125,4 +129,25 @@ summary(data)
     ##  Mean   :0.5709   Mean   :0.1767   Mean   : 0.1967   Mean   :0.1688  
     ##  3rd Qu.:0.6150   3rd Qu.:0.3250   3rd Qu.: 0.2130   3rd Qu.:0.3320  
     ##  Max.   :1.0000   Max.   :1.0000   Max.   : 1.0060   Max.   :1.0000  
-    ##
+    ## 
+
+##### Liczba wierszy danych
+
+``` r
+nrow(data)
+```
+
+    ## [1] 235790
+
+##### Korelacja między zmiennymi
+
+Odfiltrowanie daty, aby zostały same numeryczne wartości
+
+``` r
+data <- data[, !(names(data) %in% 'data')]
+correlations <- cor(data)
+correlations_melt <- arrange(melt(correlations), -abs(value))
+ggplot(correlations_melt, aes(x=Var1, y=Var2, colour=value)) + geom_point()
+```
+
+![](README_files/figure-markdown_github/unnamed-chunk-2-1.png)

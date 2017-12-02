@@ -13,6 +13,8 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r load libraries, message=FALSE}
 library(dplyr)
 library(ggplot2)
+library(reshape2)
+library(caret)
 ```
 
 ### Wczytanie danych z pliku
@@ -21,6 +23,21 @@ data <- read.csv('elektrownie.csv')
 ```
 
 ### Krótkie podsumowanie danych w zbiorze
+##### Podstawowe statystyki
 ```{r short datasummary}
 summary(data)
 ```
+##### Liczba wierszy danych
+```{r}
+nrow(data)
+```
+
+##### Korelacja między zmiennymi
+Odfiltrowanie daty, aby zostały same numeryczne wartości
+```{r}
+data <- data[, !(names(data) %in% 'data')]
+correlations <- cor(data)
+correlations_melt <- arrange(melt(correlations), -abs(value))
+ggplot(correlations_melt, aes(x=Var1, y=Var2, colour=value)) + geom_point()
+```
+
