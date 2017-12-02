@@ -1,1 +1,11 @@
-# projekt-analiza-danych
+---
+title: "Projekt analiza danych"
+author: "Wojciech Mikołajczyk"
+date: "December 2, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
