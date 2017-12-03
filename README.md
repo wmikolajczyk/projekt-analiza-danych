@@ -10,8 +10,8 @@ December 2, 2017
 -   [Krótkie podsumowanie danych w
     zbiorze](#krótkie-podsumowanie-danych-w-zbiorze)
 -   [Opis kolumn](#opis-kolumn)
--   [Brakujące wartości - ciągi 0 w różnych
-    kolumnach](#brakujące-wartości---ciągi-0-w-różnych-kolumnach)
+-   [Brakujące wartości - ciągi 0 w różnych kolumnach, tylko
+    pressure](#brakujące-wartości---ciągi-0-w-różnych-kolumnach-tylko-pressure)
 -   [Korelacja między zmiennymi](#korelacja-między-zmiennymi)
 
 ### TODO: rozdział podsumowujący analizę
@@ -40,6 +40,47 @@ any(is.na(data))
 ```
 
     ## [1] FALSE
+
+Liczba wartości zerowych w kolumnach
+
+``` r
+sapply(data, function(x) sum(x==0))
+```
+
+    ##                   id               idsito              idmodel 
+    ##                    0                13870                13870 
+    ##              idbrand                  lat                  lon 
+    ##                41610                    0                    0 
+    ##          ageinmonths                 anno                  day 
+    ##                69350                    0                  304 
+    ##                  ora                 data temperatura_ambiente 
+    ##                12410                    0                    0 
+    ##         irradiamento             pressure            windspeed 
+    ##                78489                32148                 1070 
+    ##             humidity                 icon             dewpoint 
+    ##                    0                45617                    0 
+    ##          windbearing           cloudcover                tempi 
+    ##                 2520                38394                    0 
+    ##                 irri            pressurei           windspeedi 
+    ##                    0               233263                    2 
+    ##            humidityi            dewpointi         windbearingi 
+    ##                    0                    0                    1 
+    ##          cloudcoveri                 dist             altitude 
+    ##                    1                  570                    0 
+    ##              azimuth            altitudei             azimuthi 
+    ##                    0                    1                    1 
+    ##                pcnm1                pcnm2                pcnm3 
+    ##                13870                13870                13870 
+    ##                pcnm4                pcnm5                pcnm6 
+    ##                13870                13870                13870 
+    ##                pcnm7                pcnm8                pcnm9 
+    ##                13870                13870                13870 
+    ##               pcnm10               pcnm11               pcnm12 
+    ##                13870                13870                13870 
+    ##               pcnm13               pcnm14               pcnm15 
+    ##                    0                13870                13870 
+    ##        irr_pvgis_mod       irri_pvgis_mod                  kwh 
+    ##                94008                    2                78521
 
 ##### Podstawowe statystyki
 
@@ -706,7 +747,7 @@ ggplot(data = melt(data), mapping = aes(x = value)) +
 
     ## Using data as id variables
 
-![](README_files/figure-markdown_github/unnamed-chunk-6-1.png)
+![](README_files/figure-markdown_github/unnamed-chunk-7-1.png)
 
 ### Opis kolumn
 
@@ -732,39 +773,51 @@ sapply(data[, names(data) %in% c('idsito', 'idmodel', 'idbrand')], function(x) l
     ##  idsito idmodel idbrand 
     ##      17      11       6
 
-lat - lattitude, szerokość geograficzna  
-lon - longitude, długość geograficzna  
-ageinmonths - wiek w miesiącach?  
+Jest 17 jednostek fotowoltaicznych z których są zebrane pomiary, każda z
+nich opisana jest marką i modelem oraz wiekiem w miesiącach idsito,
+idmodel, idbrand, lat, lon, ageinmonths - opisją ogniwa fotowoltaiczne.
+Wartości są znormalizowane
+
+lat - lattitude, szerokość geograficzna ogniwa fotowoltaicznego  
+lon - longitude, długość geograficzna ogniwa fotowoltaicznego  
+ageinmonths - wiek ogniwa fotowoltaicznego  
 anno - rok  
 day - dzien (przyjmuje 365 różnych wartości, więc wszystko się zgadza)  
-ora - teraz ?  
-data - data i czas w formacie MM/DD/YYYY HH:MM, od 1/2/2012 2:00 do
-12/31/2013 20:00  
+ora - teraz (0 dla godz. 2:00, rośnie do 1 dla godz 20:00 czyli końca
+pomiarów) data - data i czas w formacie MM/DD/YYYY HH:MM, od 1/2/2012
+2:00 do 12/31/2013 20:00  
 pomiary są zapisane od 2:00 do 20:00 - dlaczego? przecież latem słońce
 świeci dłużej  
 można uzyskać ilość energii wytworzonej w ciągu godziny poprzez
 grupowanie po dacie (suma wartości z kolumny kwh)  
 dlaczego jest 17 wpisów na jedną godzinę? "Każdy wiersz w zbiorze danych
 zawiera uśrednione informacje z jednej godziny pomiarów pojedynczej
-jednostki fotowoltaicznej"  
-temperatura\_ambiente - temperatura otoczenia, spodziewamy się, że to
-może wpływać na wytwarzaną ilość energii  
-irradiamento - promieniowanie  
-pressure - ciśnienie  
-windspeed - prędkość wiatru  
+jednostki fotowoltaicznej" - dlatego, że jest w sumie 17 jednostek
+(idsito) temperatura\_ambiente - temperatura otoczenia, spodziewamy się,
+że to może wpływać na wytwarzaną ilość energii  
+irradiamento - promieniowanie, zera są możliwe - może być noc, ogniwo
+może być w cieniu  
+pressure - ciśnienie, tutaj nie powinno być wartości 0, uzupełnione
+będzie średnią  
+windspeed - prędkość wiatru, bardzo mało wartości zerowych, możliwe jest
+że nie było wiatru, zostawiamy wartości 0  
 humidity - wilgotność  
 icon - ikona ?  
 dewpoint - temperatura punktu rosy (znormalizowana)  
 windbearing - łożysko wiatrowe ?  
-cloud cover - zachmurzenie  
+cloud cover - zachmurzenie, może być zerowe, zostawiamy wartości 0  
 tempi -&gt; cloudcoveri - duplikacja kolumn temperatura\_ambiente -&gt;
-cloudcover tylko kolumny nazwane po włosku? - inne wartości  
+cloudcover tylko kolumny nazwane po włosku? - inne wartości, dodane 'i'
+na końcu - co oznacza ?  
 dist - distance ?  
 altitude - wysokość  
 azimuth - azymut  
 altitudei -&gt; azimuthi - odpowiedniki włoskie altitude i azimuth -
 inne wartości  
-pcnm1 -&gt; pcnm15 - jakieś pomiary z jakichś czujników  
+pcnm1 -&gt; pcnm15 - jakieś pomiary z jakichś czujników, mają tyle samo
+zer ile idsito i idmodel (wyjątkiem jest pcnm13) co może wskazywać że są
+powiązane z czujnikami, odpowiednim ogniwom odpowiadają powtarzające się
+wartości  
 irr\_pvgis\_mod - ?  
 irri\_pvgis\_mod - ?  
 kwh - wytworzone Kilowatogodziny (wartości znormalizowane)
@@ -775,13 +828,10 @@ kwh - wytworzone Kilowatogodziny (wartości znormalizowane)
 data$data <- as.numeric(as.POSIXct(data$data, format="%m/%d/%Y %H:%M"))
 ```
 
-### Brakujące wartości - ciągi 0 w różnych kolumnach
-
-TODO: wybrać kolumny gdzie warto to zrobić
+### Brakujące wartości - ciągi 0 w różnych kolumnach, tylko pressure
 
 ``` r
-zero_to_mean <- function(x) replace(x, 0, mean(x))
-data <- sapply(data, zero_to_mean)
+data$pressure <- ifelse(data$pressure == 0, mean(data$pressure), data$pressure)
 ```
 
 ### Korelacja między zmiennymi
@@ -803,7 +853,7 @@ ggplot(data = correlations_melt, aes(Var1, Var2, fill = value)) +
   coord_fixed()
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-10-1.png)
+![](README_files/figure-markdown_github/unnamed-chunk-11-1.png)
 
 ##### Kolejny wykres korelacji - tym razem tylko dla skorelowanych dodanio / ujmenie powyżej pewnego progu
 
@@ -817,7 +867,7 @@ ggplot(data = top_correlatinons, aes(Var1, Var2, fill = value)) +
   coord_fixed()
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-11-1.png)
+![](README_files/figure-markdown_github/unnamed-chunk-12-1.png)
 
 ##### Kolejny wykres korelacji - korelacja atrybutów do kwh
 
@@ -830,6 +880,6 @@ ggplot(data = kwh_correlations, mapping = aes(x=rownames(kwh_correlations), y=va
   theme_bw()
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-12-1.png)
+![](README_files/figure-markdown_github/unnamed-chunk-13-1.png)
 
 ##### Wykres - zamiana energii w czasie i przestrzeni

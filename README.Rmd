@@ -34,6 +34,11 @@ data <- read.csv('elektrownie.csv')
 any(is.na(data))
 ```
 
+Liczba wartości zerowych w kolumnach
+```{r}
+sapply(data, function(x) sum(x==0))
+```
+
 ##### Podstawowe statystyki
 ```{r short datasummary}
 summary(data)
@@ -81,32 +86,34 @@ liczba różnych wartości jakie przyjmują:
 ```{r}
 sapply(data[, names(data) %in% c('idsito', 'idmodel', 'idbrand')], function(x) length(unique(x)))
 ```
+Jest 17 jednostek fotowoltaicznych z których są zebrane pomiary, każda z nich opisana jest marką i modelem oraz wiekiem w miesiącach
+idsito, idmodel, idbrand, lat, lon, ageinmonths - opisją ogniwa fotowoltaiczne. Wartości są znormalizowane 
 
-lat - lattitude, szerokość geograficzna  
-lon - longitude, długość geograficzna  
-ageinmonths - wiek w miesiącach?  
+lat - lattitude, szerokość geograficzna ogniwa fotowoltaicznego  
+lon - longitude, długość geograficzna ogniwa fotowoltaicznego  
+ageinmonths - wiek ogniwa fotowoltaicznego  
 anno - rok  
 day - dzien (przyjmuje 365 różnych wartości, więc wszystko się zgadza)  
-ora - teraz ?  
+ora - teraz (0 dla godz. 2:00, rośnie do 1 dla godz 20:00 czyli końca pomiarów)
 data - data i czas w formacie MM/DD/YYYY HH:MM, od 1/2/2012 2:00 do 12/31/2013 20:00  
 pomiary są zapisane od 2:00 do 20:00 - dlaczego? przecież latem słońce świeci dłużej  
 można uzyskać ilość energii wytworzonej w ciągu godziny poprzez grupowanie po dacie (suma wartości z kolumny kwh)  
-dlaczego jest 17 wpisów na jedną godzinę? "Każdy wiersz w zbiorze danych zawiera uśrednione informacje z jednej godziny pomiarów pojedynczej jednostki fotowoltaicznej"  
+dlaczego jest 17 wpisów na jedną godzinę? "Każdy wiersz w zbiorze danych zawiera uśrednione informacje z jednej godziny pomiarów pojedynczej jednostki fotowoltaicznej" - dlatego, że jest w sumie 17 jednostek (idsito)
 temperatura_ambiente - temperatura otoczenia, spodziewamy się, że to może wpływać na wytwarzaną ilość energii  
-irradiamento - promieniowanie  
-pressure - ciśnienie  
-windspeed - prędkość wiatru  
+irradiamento - promieniowanie, zera są możliwe - może być noc, ogniwo może być w cieniu  
+pressure - ciśnienie, tutaj nie powinno być wartości 0, uzupełnione będzie średnią  
+windspeed - prędkość wiatru, bardzo mało wartości zerowych, możliwe jest że nie było wiatru, zostawiamy wartości 0  
 humidity - wilgotność  
 icon - ikona ?  
 dewpoint - temperatura punktu rosy (znormalizowana)  
 windbearing - łożysko wiatrowe ?  
-cloud cover - zachmurzenie  
-tempi -> cloudcoveri - duplikacja kolumn temperatura_ambiente -> cloudcover tylko kolumny nazwane po włosku? - inne wartości  
+cloud cover - zachmurzenie, może być zerowe, zostawiamy wartości 0  
+tempi -> cloudcoveri - duplikacja kolumn temperatura_ambiente -> cloudcover tylko kolumny nazwane po włosku? - inne wartości, dodane 'i' na końcu - co oznacza ?    
 dist - distance ?  
 altitude - wysokość  
 azimuth - azymut  
 altitudei -> azimuthi - odpowiedniki włoskie altitude i azimuth - inne wartości  
-pcnm1 -> pcnm15 - jakieś pomiary z jakichś czujników  
+pcnm1 -> pcnm15 - jakieś pomiary z jakichś czujników, mają tyle samo zer ile idsito i idmodel (wyjątkiem jest pcnm13) co może wskazywać że są powiązane z czujnikami, odpowiednim ogniwom odpowiadają powtarzające się wartości  
 irr_pvgis_mod - ?  
 irri_pvgis_mod - ?  
 kwh - wytworzone Kilowatogodziny (wartości znormalizowane)  
@@ -116,11 +123,9 @@ kwh - wytworzone Kilowatogodziny (wartości znormalizowane)
 data$data <- as.numeric(as.POSIXct(data$data, format="%m/%d/%Y %H:%M"))
 ```
 
-### Brakujące wartości - ciągi 0 w różnych kolumnach
-TODO: wybrać kolumny gdzie warto to zrobić  
+### Brakujące wartości - ciągi 0 w różnych kolumnach, tylko pressure
 ```{r}
-zero_to_mean <- function(x) replace(x, 0, mean(x))
-data <- sapply(data, zero_to_mean)
+data$pressure <- ifelse(data$pressure == 0, mean(data$pressure), data$pressure)
 ```
 
 ### Korelacja między zmiennymi
