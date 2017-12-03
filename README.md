@@ -497,8 +497,8 @@ kwh - wytworzone Kilowatogodziny (wartości znormalizowane)
 ##### Rozkład wartości poszczególnych atrybutów
 
 ``` r
-ggplot(data = melt(sample_n(data, 100)), mapping = aes(x = value)) + 
-  geom_histogram(bins = 10) + facet_wrap(~variable, ncol=4, scales = 'free_x') + theme_bw()
+ggplot(data = melt(data), mapping = aes(x = value)) + 
+  geom_histogram(bins=50) + facet_wrap(~variable, ncol=4, scales = 'free_x') + scale_x_continuous(labels = scales::comma) + theme_bw()
 ```
 
     ## Using data as id variables
