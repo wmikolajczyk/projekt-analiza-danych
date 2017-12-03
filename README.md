@@ -453,7 +453,11 @@ irr\_pvgis\_mod - ?
 irri\_pvgis\_mod - ?
 kwh - wytworzone Kilowatogodziny (wartości znormalizowane)
 
+##### Jakiś wykresik do opisu kolumn
+
 ##### Brakujące wartości - ciągi 0 w różnych kolumnach - co z tym zrobić?
+
+##### Przetworzenie daty na wartość liczbową
 
 ##### Korelacja między zmiennymi
 
@@ -475,3 +479,7 @@ ggplot(data = correlations_melt, aes(Var1, Var2, fill = value)) +
 ```
 
 ![](README_files/figure-markdown_github/unnamed-chunk-5-1.png)
+
+##### Kolejny wykres korelacji - tym razem tylko dla skorelowanych dodanio / ujmenie powyżej pewnego progu
+
+##### Wykres - zamiana energii w czasie i przestrzeni
