@@ -36,6 +36,10 @@ nrow(data)
 ```{r}
 ncol(data)
 ```
+##### Typy kolumn
+```{r}
+sapply(data, class)
+```
 
 ##### Liczba różnych wartości kolumn
 ```{r}
@@ -86,17 +90,23 @@ irr_pvgis_mod - ?
 irri_pvgis_mod - ?  
 kwh - wytworzone Kilowatogodziny (wartości znormalizowane)  
 
-##### Jakiś wykresik do opisu kolumn
+##### Rozkład wartości poszczególnych atrybutów
+```{r fig.width=9, fig.height=18, cache=TRUE}
+ggplot(data = melt(sample_n(data, 100)), mapping = aes(x = value)) + 
+  geom_histogram(bins = 10) + facet_wrap(~variable, ncol=4, scales = 'free_x') + theme_bw()
+```
 
 ##### Brakujące wartości - ciągi 0 w różnych kolumnach - co z tym zrobić?
 
 ##### Przetworzenie daty na wartość liczbową
+data <- data[, !(names(data) %in% 'data')]  
+data$data <- as.numeric(as.POSIXct(data$data, format="%m/%d/%Y %H:%M"))
 
 ##### Korelacja między zmiennymi
 Odfiltrowanie daty, aby zostały same numeryczne wartości  
 Macierz korelacji jest symetryczna, więc dla czytelności usuwamy górny trójkąt
 ```{r fig.width=9, fig.height=9}
-data <- data[, !(names(data) %in% 'data')]
+data$data <- as.numeric(as.POSIXct(data$data, format="%m/%d/%Y %H:%M"))
 correlations <- round(cor(data), 2)
 correlations[upper.tri(correlations)] <- NA
 correlations_melt <- melt(correlations, na.rm = TRUE)
@@ -110,6 +120,15 @@ ggplot(data = correlations_melt, aes(Var1, Var2, fill = value)) +
 ```
 
 ##### Kolejny wykres korelacji - tym razem tylko dla skorelowanych dodanio / ujmenie powyżej pewnego progu
+```{r fig.width=9, fig.height=9}
+top_correlatinons <- correlations_melt %>% filter(abs(value) > 0.3) %>% filter(Var1 != Var2)
+ggplot(data = top_correlatinons, aes(Var1, Var2, fill = value)) + 
+  geom_tile(color = "white") + 
+  scale_fill_gradient2(low="blue", mid="white", high="red", midpoint=0, limit=c(-1,1)) + 
+  theme_minimal() + 
+  theme(axis.text.x = element_text(angle = 70, size = 8, vjust = 1, hjust = 1)) +
+  coord_fixed()
+```
 
 ##### Wykres - zamiana energii w czasie i przestrzeni
 

@@ -147,6 +147,47 @@ ncol(data)
 
     ## [1] 51
 
+##### Typy kolumn
+
+``` r
+sapply(data, class)
+```
+
+    ##                   id               idsito              idmodel 
+    ##            "integer"            "numeric"            "numeric" 
+    ##              idbrand                  lat                  lon 
+    ##            "numeric"            "numeric"            "numeric" 
+    ##          ageinmonths                 anno                  day 
+    ##            "numeric"            "integer"            "numeric" 
+    ##                  ora                 data temperatura_ambiente 
+    ##            "numeric"             "factor"            "numeric" 
+    ##         irradiamento             pressure            windspeed 
+    ##            "numeric"            "numeric"            "numeric" 
+    ##             humidity                 icon             dewpoint 
+    ##            "numeric"            "numeric"            "numeric" 
+    ##          windbearing           cloudcover                tempi 
+    ##            "numeric"            "numeric"            "numeric" 
+    ##                 irri            pressurei           windspeedi 
+    ##            "numeric"            "numeric"            "numeric" 
+    ##            humidityi            dewpointi         windbearingi 
+    ##            "numeric"            "numeric"            "numeric" 
+    ##          cloudcoveri                 dist             altitude 
+    ##            "numeric"            "numeric"            "numeric" 
+    ##              azimuth            altitudei             azimuthi 
+    ##            "numeric"            "numeric"            "numeric" 
+    ##                pcnm1                pcnm2                pcnm3 
+    ##            "numeric"            "numeric"            "numeric" 
+    ##                pcnm4                pcnm5                pcnm6 
+    ##            "numeric"            "numeric"            "numeric" 
+    ##                pcnm7                pcnm8                pcnm9 
+    ##            "numeric"            "numeric"            "numeric" 
+    ##               pcnm10               pcnm11               pcnm12 
+    ##            "numeric"            "numeric"            "numeric" 
+    ##               pcnm13               pcnm14               pcnm15 
+    ##            "numeric"            "numeric"            "numeric" 
+    ##        irr_pvgis_mod       irri_pvgis_mod                  kwh 
+    ##            "numeric"            "numeric"            "numeric"
+
 ##### Liczba różnych wartości kolumn
 
 ``` r
@@ -453,11 +494,23 @@ irr\_pvgis\_mod - ?
 irri\_pvgis\_mod - ?
 kwh - wytworzone Kilowatogodziny (wartości znormalizowane)
 
-##### Jakiś wykresik do opisu kolumn
+##### Rozkład wartości poszczególnych atrybutów
+
+``` r
+ggplot(data = melt(sample_n(data, 100)), mapping = aes(x = value)) + 
+  geom_histogram(bins = 10) + facet_wrap(~variable, ncol=4, scales = 'free_x') + theme_bw()
+```
+
+    ## Using data as id variables
+
+![](README_files/figure-markdown_github/unnamed-chunk-6-1.png)
 
 ##### Brakujące wartości - ciągi 0 w różnych kolumnach - co z tym zrobić?
 
 ##### Przetworzenie daty na wartość liczbową
+
+data &lt;- data\[, !(names(data) %in% 'data')\]
+data*d**a**t**a* &lt; −*a**s*.*n**u**m**e**r**i**c*(*a**s*.*P**O**S**I**X**c**t*(*d**a**t**a*data, format="%m/%d/%Y %H:%M"))
 
 ##### Korelacja między zmiennymi
 
@@ -465,7 +518,7 @@ Odfiltrowanie daty, aby zostały same numeryczne wartości
 Macierz korelacji jest symetryczna, więc dla czytelności usuwamy górny trójkąt
 
 ``` r
-data <- data[, !(names(data) %in% 'data')]
+data$data <- as.numeric(as.POSIXct(data$data, format="%m/%d/%Y %H:%M"))
 correlations <- round(cor(data), 2)
 correlations[upper.tri(correlations)] <- NA
 correlations_melt <- melt(correlations, na.rm = TRUE)
@@ -478,8 +531,20 @@ ggplot(data = correlations_melt, aes(Var1, Var2, fill = value)) +
   coord_fixed()
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-5-1.png)
+![](README_files/figure-markdown_github/unnamed-chunk-7-1.png)
 
 ##### Kolejny wykres korelacji - tym razem tylko dla skorelowanych dodanio / ujmenie powyżej pewnego progu
+
+``` r
+top_correlatinons <- correlations_melt %>% filter(abs(value) > 0.3) %>% filter(Var1 != Var2)
+ggplot(data = top_correlatinons, aes(Var1, Var2, fill = value)) + 
+  geom_tile(color = "white") + 
+  scale_fill_gradient2(low="blue", mid="white", high="red", midpoint=0, limit=c(-1,1)) + 
+  theme_minimal() + 
+  theme(axis.text.x = element_text(angle = 70, size = 8, vjust = 1, hjust = 1)) +
+  coord_fixed()
+```
+
+![](README_files/figure-markdown_github/unnamed-chunk-8-1.png)
 
 ##### Wykres - zamiana energii w czasie i przestrzeni
