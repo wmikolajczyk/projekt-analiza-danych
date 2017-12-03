@@ -9,6 +9,10 @@ output: github_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+### TODO: spis treści
+
+### TODO: rozdział podsumowujący analizę
+
 ### Wykorzystane biblioteki
 ```{r load libraries, message=FALSE}
 library(dplyr)
@@ -45,6 +49,16 @@ sapply(data, class)
 ```{r}
 pander::pander(rapply(data, function(x) length(unique(x))))
 ```
+
+##### Rozkład wartości poszczególnych atrybutów
+```{r fig.width=9, fig.height=18, cache=TRUE}
+ggplot(data = melt(data), mapping = aes(x = value)) + 
+  geom_histogram(bins=50) + 
+  facet_wrap(~variable, ncol=4, scales = 'free_x') + 
+  scale_x_continuous(labels = scales::comma) + 
+  theme_bw()
+```
+
 ##### Opis kolumn
 Dane są z ogniw fotowoltaicznych umieszczonych we Włoszech, to tłumaczy dlaczego część kolumn w pliku z danymi ma włoskie nazwy.  
 Zbiór danych opisany jest przy użyciu 51 kolumn.  
@@ -89,12 +103,6 @@ pcnm1 -> pcnm15 - jakieś pomiary z jakichś czujników
 irr_pvgis_mod - ?  
 irri_pvgis_mod - ?  
 kwh - wytworzone Kilowatogodziny (wartości znormalizowane)  
-
-##### Rozkład wartości poszczególnych atrybutów
-```{r fig.width=9, fig.height=18, cache=TRUE}
-ggplot(data = melt(data), mapping = aes(x = value)) + 
-  geom_histogram(bins=50) + facet_wrap(~variable, ncol=4, scales = 'free_x') + scale_x_continuous(labels = scales::comma) + theme_bw()
-```
 
 ##### Brakujące wartości - ciągi 0 w różnych kolumnach - co z tym zrobić?
 

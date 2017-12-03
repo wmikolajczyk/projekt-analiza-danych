@@ -3,6 +3,10 @@ Projekt analiza danych
 Wojciech Mikołajczyk
 December 2, 2017
 
+### TODO: spis treści
+
+### TODO: rozdział podsumowujący analizę
+
 ### Wykorzystane biblioteki
 
 ``` r
@@ -444,6 +448,20 @@ pander::pander(rapply(data, function(x) length(unique(x))))
 </tbody>
 </table>
 
+##### Rozkład wartości poszczególnych atrybutów
+
+``` r
+ggplot(data = melt(data), mapping = aes(x = value)) + 
+  geom_histogram(bins=50) + 
+  facet_wrap(~variable, ncol=4, scales = 'free_x') + 
+  scale_x_continuous(labels = scales::comma) + 
+  theme_bw()
+```
+
+    ## Using data as id variables
+
+![](README_files/figure-markdown_github/unnamed-chunk-5-1.png)
+
 ##### Opis kolumn
 
 Dane są z ogniw fotowoltaicznych umieszczonych we Włoszech, to tłumaczy dlaczego część kolumn w pliku z danymi ma włoskie nazwy.
@@ -493,17 +511,6 @@ pcnm1 -&gt; pcnm15 - jakieś pomiary z jakichś czujników
 irr\_pvgis\_mod - ?
 irri\_pvgis\_mod - ?
 kwh - wytworzone Kilowatogodziny (wartości znormalizowane)
-
-##### Rozkład wartości poszczególnych atrybutów
-
-``` r
-ggplot(data = melt(data), mapping = aes(x = value)) + 
-  geom_histogram(bins=50) + facet_wrap(~variable, ncol=4, scales = 'free_x') + scale_x_continuous(labels = scales::comma) + theme_bw()
-```
-
-    ## Using data as id variables
-
-![](README_files/figure-markdown_github/unnamed-chunk-6-1.png)
 
 ##### Brakujące wartości - ciągi 0 w różnych kolumnach - co z tym zrobić?
 
