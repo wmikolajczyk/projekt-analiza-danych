@@ -740,6 +740,7 @@ pander::pander(sapply(data, function(x) length(unique(x))))
 ``` r
 ggplot(data = melt(data), mapping = aes(x = value)) + 
   geom_histogram(bins=50) + 
+  labs(title = "Rozkład wartości atrybutów") + 
   facet_wrap(~variable, ncol=4, scales = 'free_x') + 
   scale_x_continuous(labels = scales::comma) + 
   theme_bw()
@@ -822,16 +823,17 @@ irr\_pvgis\_mod - ?
 irri\_pvgis\_mod - ?  
 kwh - wytworzone Kilowatogodziny (wartości znormalizowane)
 
-##### Przetworzenie daty na wartość liczbową
-
-``` r
-data$data <- as.numeric(as.POSIXct(data$data, format="%m/%d/%Y %H:%M"))
-```
-
 ### Brakujące wartości - ciągi 0 w różnych kolumnach, tylko pressure
 
 ``` r
 data$pressure <- ifelse(data$pressure == 0, mean(data$pressure), data$pressure)
+```
+
+##### Przetworzenie daty na wartość liczbową
+
+``` r
+data2 <- data
+data2$data <- as.numeric(as.POSIXct(data2$data, format="%m/%d/%Y %H:%M"))
 ```
 
 ### Korelacja między zmiennymi
@@ -841,12 +843,13 @@ Macierz korelacji jest symetryczna, więc dla czytelności usuwamy górny
 trójkąt
 
 ``` r
-correlations <- round(cor(data), 2)
+correlations <- round(cor(data2), 2)
 correlations[upper.tri(correlations)] <- NA
 correlations_melt <- melt(correlations, na.rm = TRUE)
 
 ggplot(data = correlations_melt, aes(Var1, Var2, fill = value)) + 
   geom_tile(color = "white") + 
+  labs(title = "Korelacja atrybutów", x = "Atrybuty", y = "Wartość korelacji") + 
   scale_fill_gradient2(low="blue", mid="white", high="red", midpoint=0, limit=c(-1,1)) + 
   theme_minimal() + 
   theme(axis.text.x = element_text(angle = 70, size = 8, vjust = 1, hjust = 1)) +
@@ -861,6 +864,7 @@ ggplot(data = correlations_melt, aes(Var1, Var2, fill = value)) +
 top_correlatinons <- correlations_melt %>% filter(abs(value) > 0.3, Var1 != Var2)
 ggplot(data = top_correlatinons, aes(Var1, Var2, fill = value)) + 
   geom_tile(color = "white") + 
+  labs(title = "Korelacja atrybutów powyżej progu korelacji", x = "Atrybuty", y = "Wartość korelacji") + 
   scale_fill_gradient2(low="blue", mid="white", high="red", midpoint=0, limit=c(-1,1)) + 
   theme_minimal() + 
   theme(axis.text.x = element_text(angle = 70, size = 8, vjust = 1, hjust = 1)) +
@@ -875,7 +879,7 @@ ggplot(data = top_correlatinons, aes(Var1, Var2, fill = value)) +
 kwh_correlations <- melt(correlations['kwh', ])
 ggplot(data = kwh_correlations, mapping = aes(x=rownames(kwh_correlations), y=value)) + 
   geom_bar(stat="identity") + 
-  labs(title="Korelacja do atrybutu kwh", x = "atrybuty", y = "wartość korelacji") + 
+  labs(title = "Korelacja do atrybutu kwh", x = "Atrybuty", y = "Wartość korelacji") + 
   coord_flip() + 
   theme_bw()
 ```
@@ -883,3 +887,18 @@ ggplot(data = kwh_correlations, mapping = aes(x=rownames(kwh_correlations), y=va
 ![](README_files/figure-markdown_github/unnamed-chunk-13-1.png)
 
 ##### Wykres - zamiana energii w czasie i przestrzeni
+
+Zmiana daty na rok-miesiac
+
+``` r
+data <- data %>% 
+  rename(date=data) %>% 
+  mutate(date_year_month=format(as.POSIXct(date, format='%m/%d/%Y %H:%M'), "%Y-%m"))
+
+data2 <- data %>% group_by(date_year_month, idsito) %>% summarise(sum_kwh=sum(kwh))
+ggplot(data = data2, mapping = aes(x=date_year_month, y=sum_kwh, color=factor(idsito))) + 
+  geom_point() +
+  labs(title = "Wykres energii w czasie dla ogniw", x = "Data", y = "Suma wytworzonej energii[kwh]")
+```
+
+![](README_files/figure-markdown_github/unnamed-chunk-14-1.png)
