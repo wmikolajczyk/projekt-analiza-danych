@@ -3,7 +3,6 @@ Projekt analiza danych
 Wojciech Mikołajczyk
 December 2, 2017
 
--   [TODO: spis treści](#todo-spis-treści)
 -   [TODO: rozdział podsumowujący
     analizę](#todo-rozdział-podsumowujący-analizę)
 -   [Wykorzystane biblioteki](#wykorzystane-biblioteki)
@@ -11,11 +10,9 @@ December 2, 2017
 -   [Krótkie podsumowanie danych w
     zbiorze](#krótkie-podsumowanie-danych-w-zbiorze)
 -   [Opis kolumn](#opis-kolumn)
--   [Brakujące wartości - ciągi 0 w różnych kolumnach - co z tym
-    zrobić?](#brakujące-wartości---ciągi-0-w-różnych-kolumnach---co-z-tym-zrobić)
+-   [Brakujące wartości - ciągi 0 w różnych
+    kolumnach](#brakujące-wartości---ciągi-0-w-różnych-kolumnach)
 -   [Korelacja między zmiennymi](#korelacja-między-zmiennymi)
-
-### TODO: spis treści
 
 ### TODO: rozdział podsumowujący analizę
 
@@ -35,6 +32,14 @@ data <- read.csv('elektrownie.csv')
 ```
 
 ### Krótkie podsumowanie danych w zbiorze
+
+##### Sprawdzenie czy zbiór danych zawiera wartości NA
+
+``` r
+any(is.na(data))
+```
+
+    ## [1] FALSE
 
 ##### Podstawowe statystyki
 
@@ -701,7 +706,7 @@ ggplot(data = melt(data), mapping = aes(x = value)) +
 
     ## Using data as id variables
 
-![](README_files/figure-markdown_github/unnamed-chunk-5-1.png)
+![](README_files/figure-markdown_github/unnamed-chunk-6-1.png)
 
 ### Opis kolumn
 
@@ -764,13 +769,20 @@ irr\_pvgis\_mod - ?
 irri\_pvgis\_mod - ?  
 kwh - wytworzone Kilowatogodziny (wartości znormalizowane)
 
-### Brakujące wartości - ciągi 0 w różnych kolumnach - co z tym zrobić?
-
 ##### Przetworzenie daty na wartość liczbową
 
-data &lt;- data\[, !(names(data) %in% 'data')\]  
-data*d**a**t**a* &lt; −*a**s*.*n**u**m**e**r**i**c*(*a**s*.*P**O**S**I**X**c**t*(*d**a**t**a*data,
-format="%m/%d/%Y %H:%M"))
+``` r
+data$data <- as.numeric(as.POSIXct(data$data, format="%m/%d/%Y %H:%M"))
+```
+
+### Brakujące wartości - ciągi 0 w różnych kolumnach
+
+TODO: wybrać kolumny gdzie warto to zrobić
+
+``` r
+zero_to_mean <- function(x) replace(x, 0, mean(x))
+data <- sapply(data, zero_to_mean)
+```
 
 ### Korelacja między zmiennymi
 
@@ -779,7 +791,6 @@ Macierz korelacji jest symetryczna, więc dla czytelności usuwamy górny
 trójkąt
 
 ``` r
-data$data <- as.numeric(as.POSIXct(data$data, format="%m/%d/%Y %H:%M"))
 correlations <- round(cor(data), 2)
 correlations[upper.tri(correlations)] <- NA
 correlations_melt <- melt(correlations, na.rm = TRUE)
@@ -792,7 +803,7 @@ ggplot(data = correlations_melt, aes(Var1, Var2, fill = value)) +
   coord_fixed()
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-7-1.png)
+![](README_files/figure-markdown_github/unnamed-chunk-10-1.png)
 
 ##### Kolejny wykres korelacji - tym razem tylko dla skorelowanych dodanio / ujmenie powyżej pewnego progu
 
@@ -806,7 +817,7 @@ ggplot(data = top_correlatinons, aes(Var1, Var2, fill = value)) +
   coord_fixed()
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-8-1.png)
+![](README_files/figure-markdown_github/unnamed-chunk-11-1.png)
 
 ##### Kolejny wykres korelacji - korelacja atrybutów do kwh
 
@@ -819,6 +830,6 @@ ggplot(data = kwh_correlations, mapping = aes(x=rownames(kwh_correlations), y=va
   theme_bw()
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-9-1.png)
+![](README_files/figure-markdown_github/unnamed-chunk-12-1.png)
 
 ##### Wykres - zamiana energii w czasie i przestrzeni
