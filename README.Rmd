@@ -138,5 +138,15 @@ ggplot(data = top_correlatinons, aes(Var1, Var2, fill = value)) +
   coord_fixed()
 ```
 
+##### Kolejny wykres korelacji - korelacja atrybutów do kwh
+```{r fig.width=9, fig.height=9}
+kwh_correlations <- melt(correlations['kwh', ])
+ggplot(data = kwh_correlations, mapping = aes(x=rownames(kwh_correlations), y=value)) + 
+  geom_bar(stat="identity") + 
+  labs(title="Korelacja do atrybutu kwh", x = "atrybuty", y = "wartość korelacji") + 
+  coord_flip() + 
+  theme_bw()
+```
+
 ##### Wykres - zamiana energii w czasie i przestrzeni
 

@@ -783,4 +783,17 @@ ggplot(data = top_correlatinons, aes(Var1, Var2, fill = value)) +
 
 ![](README_files/figure-markdown_github/unnamed-chunk-8-1.png)
 
+##### Kolejny wykres korelacji - korelacja atrybutów do kwh
+
+``` r
+kwh_correlations <- melt(correlations['kwh', ])
+ggplot(data = kwh_correlations, mapping = aes(x=rownames(kwh_correlations), y=value)) + 
+  geom_bar(stat="identity") + 
+  labs(title="Korelacja do atrybutu kwh", x = "atrybuty", y = "wartość korelacji") + 
+  coord_flip() + 
+  theme_bw()
+```
+
+![](README_files/figure-markdown_github/unnamed-chunk-9-1.png)
+
 ##### Wykres - zamiana energii w czasie i przestrzeni
