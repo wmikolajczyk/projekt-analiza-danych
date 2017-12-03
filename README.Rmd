@@ -32,11 +32,45 @@ summary(data)
 nrow(data)
 ```
 
-##### Korelacja między zmiennymi
-Odfiltrowanie daty, aby zostały same numeryczne wartości
-
-Macierz korelacji jest symetryczna, więc dla czytelności usuwamy górny trójkąt
+##### Liczba kolumn
 ```{r}
+ncol(data)
+```
+
+##### Liczba różnych wartości kolumn
+```{r}
+pander::pander(rapply(data, function(x) length(unique(x))))
+```
+##### Opis kolumn
+Dane są z ogniw fotowoltaicznych umieszczonych we Włoszech, to tłumaczy dlaczego część kolumn w pliku z danymi ma włoskie nazwy.  
+Zbiór danych opisany jest przy użyciu 51 kolumn.  
+Wszystkie kolumny poza kolumnami 'id', 'data' oraz 'anno' mają wartości liczbowe i są znormalizowane.  
+
+id - identyfikator  
+idsito - id miejsca  
+idmodel - id modelu  
+idbrand - id marki  
+
+idsito, idmodel i idbrand są znormalizowanymi identyfikatorami miejsca modelu i marki  
+liczba różnych wartości jakie przyjmują:
+```{r}
+rapply(data[, names(data) %in% c('idsito', 'idmodel', 'idbrand')], function(x) length(unique(x)))
+```
+
+lat - lattitude, szerokość geograficzna  
+lon - longitude, długość geograficzna  
+ageinmonths - wiek w miesiącach?  
+anno - rok  
+day - dzien (przyjmuje 365 różnych wartości, więc wszystko się zgadza)  
+ora - teraz ?  
+data - data i czas w formacie MM/DD/YYYY HH:MM, od 1/2/2012 2:00 do 12/31/2013 20:00  
+pomiary są zapisane od 2:00 do 20:00 - dlaczego? przecież latem słońce świeci dłużej  
+można uzyskać ilość energii wytworzonej w ciągu godziny poprzez grupowanie po dacie (suma wartości z kolumny kwh)
+
+##### Korelacja między zmiennymi
+Odfiltrowanie daty, aby zostały same numeryczne wartości  
+Macierz korelacji jest symetryczna, więc dla czytelności usuwamy górny trójkąt
+```{r fig.width=9, fig.height=9}
 data <- data[, !(names(data) %in% 'data')]
 correlations <- round(cor(data), 2)
 correlations[upper.tri(correlations)] <- NA

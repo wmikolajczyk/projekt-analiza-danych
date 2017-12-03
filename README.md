@@ -139,10 +139,304 @@ nrow(data)
 
     ## [1] 235790
 
+##### Liczba kolumn
+
+``` r
+ncol(data)
+```
+
+    ## [1] 51
+
+##### Liczba różnych wartości kolumn
+
+``` r
+pander::pander(rapply(data, function(x) length(unique(x))))
+```
+
+<table>
+<caption>Table continues below</caption>
+<colgroup>
+<col width="11%" />
+<col width="11%" />
+<col width="12%" />
+<col width="12%" />
+<col width="7%" />
+<col width="7%" />
+<col width="17%" />
+<col width="8%" />
+<col width="8%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">id</th>
+<th align="center">idsito</th>
+<th align="center">idmodel</th>
+<th align="center">idbrand</th>
+<th align="center">lat</th>
+<th align="center">lon</th>
+<th align="center">ageinmonths</th>
+<th align="center">anno</th>
+<th align="center">day</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">235790</td>
+<td align="center">17</td>
+<td align="center">11</td>
+<td align="center">6</td>
+<td align="center">9</td>
+<td align="center">12</td>
+<td align="center">7</td>
+<td align="center">2</td>
+<td align="center">365</td>
+</tr>
+</tbody>
+</table>
+
+<table>
+<caption>Table continues below</caption>
+<colgroup>
+<col width="8%" />
+<col width="10%" />
+<col width="31%" />
+<col width="20%" />
+<col width="14%" />
+<col width="14%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">ora</th>
+<th align="center">data</th>
+<th align="center">temperatura_ambiente</th>
+<th align="center">irradiamento</th>
+<th align="center">pressure</th>
+<th align="center">windspeed</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">19</td>
+<td align="center">13870</td>
+<td align="center">52</td>
+<td align="center">639</td>
+<td align="center">41</td>
+<td align="center">367</td>
+</tr>
+</tbody>
+</table>
+
+<table>
+<caption>Table continues below</caption>
+<colgroup>
+<col width="15%" />
+<col width="9%" />
+<col width="15%" />
+<col width="19%" />
+<col width="18%" />
+<col width="11%" />
+<col width="11%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">humidity</th>
+<th align="center">icon</th>
+<th align="center">dewpoint</th>
+<th align="center">windbearing</th>
+<th align="center">cloudcover</th>
+<th align="center">tempi</th>
+<th align="center">irri</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">85</td>
+<td align="center">7</td>
+<td align="center">634</td>
+<td align="center">360</td>
+<td align="center">101</td>
+<td align="center">522</td>
+<td align="center">236</td>
+</tr>
+</tbody>
+</table>
+
+<table>
+<caption>Table continues below</caption>
+<colgroup>
+<col width="15%" />
+<col width="16%" />
+<col width="15%" />
+<col width="15%" />
+<col width="18%" />
+<col width="18%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">pressurei</th>
+<th align="center">windspeedi</th>
+<th align="center">humidityi</th>
+<th align="center">dewpointi</th>
+<th align="center">windbearingi</th>
+<th align="center">cloudcoveri</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">47</td>
+<td align="center">126</td>
+<td align="center">409</td>
+<td align="center">183</td>
+<td align="center">514</td>
+<td align="center">393</td>
+</tr>
+</tbody>
+</table>
+
+<table>
+<caption>Table continues below</caption>
+<colgroup>
+<col width="9%" />
+<col width="14%" />
+<col width="13%" />
+<col width="16%" />
+<col width="14%" />
+<col width="10%" />
+<col width="10%" />
+<col width="10%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">dist</th>
+<th align="center">altitude</th>
+<th align="center">azimuth</th>
+<th align="center">altitudei</th>
+<th align="center">azimuthi</th>
+<th align="center">pcnm1</th>
+<th align="center">pcnm2</th>
+<th align="center">pcnm3</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">184</td>
+<td align="center">773</td>
+<td align="center">689</td>
+<td align="center">935</td>
+<td align="center">937</td>
+<td align="center">11</td>
+<td align="center">16</td>
+<td align="center">13</td>
+</tr>
+</tbody>
+</table>
+
+<table>
+<caption>Table continues below</caption>
+<colgroup>
+<col width="10%" />
+<col width="10%" />
+<col width="10%" />
+<col width="10%" />
+<col width="10%" />
+<col width="10%" />
+<col width="12%" />
+<col width="12%" />
+<col width="12%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">pcnm4</th>
+<th align="center">pcnm5</th>
+<th align="center">pcnm6</th>
+<th align="center">pcnm7</th>
+<th align="center">pcnm8</th>
+<th align="center">pcnm9</th>
+<th align="center">pcnm10</th>
+<th align="center">pcnm11</th>
+<th align="center">pcnm12</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">13</td>
+<td align="center">13</td>
+<td align="center">12</td>
+<td align="center">13</td>
+<td align="center">13</td>
+<td align="center">13</td>
+<td align="center">13</td>
+<td align="center">13</td>
+<td align="center">13</td>
+</tr>
+</tbody>
+</table>
+
+<table style="width:90%;">
+<colgroup>
+<col width="12%" />
+<col width="12%" />
+<col width="12%" />
+<col width="22%" />
+<col width="23%" />
+<col width="6%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">pcnm13</th>
+<th align="center">pcnm14</th>
+<th align="center">pcnm15</th>
+<th align="center">irr_pvgis_mod</th>
+<th align="center">irri_pvgis_mod</th>
+<th align="center">kwh</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">13</td>
+<td align="center">13</td>
+<td align="center">11</td>
+<td align="center">870</td>
+<td align="center">752</td>
+<td align="center">864</td>
+</tr>
+</tbody>
+</table>
+
+##### Opis kolumn
+
+Dane są z ogniw fotowoltaicznych umieszczonych we Włoszech, to tłumaczy dlaczego część kolumn w pliku z danymi ma włoskie nazwy.
+Zbiór danych opisany jest przy użyciu 51 kolumn.
+Wszystkie kolumny poza kolumnami 'id', 'data' oraz 'anno' mają wartości liczbowe i są znormalizowane.
+
+id - identyfikator
+idsito - id miejsca
+idmodel - id modelu
+idbrand - id marki
+
+idsito, idmodel i idbrand są znormalizowanymi identyfikatorami miejsca modelu i marki
+liczba różnych wartości jakie przyjmują:
+
+``` r
+rapply(data[, names(data) %in% c('idsito', 'idmodel', 'idbrand')], function(x) length(unique(x)))
+```
+
+    ##  idsito idmodel idbrand 
+    ##      17      11       6
+
+lat - lattitude, szerokość geograficzna
+lon - longitude, długość geograficzna
+ageinmonths - wiek w miesiącach?
+anno - rok
+day - dzien (przyjmuje 365 różnych wartości, więc wszystko się zgadza)
+ora - teraz ?
+data - data i czas w formacie MM/DD/YYYY HH:MM, od 1/2/2012 2:00 do 12/31/2013 20:00
+pomiary są zapisane od 2:00 do 20:00 - dlaczego? przecież latem słońce świeci dłużej
+można uzyskać ilość energii wytworzonej w ciągu godziny poprzez grupowanie po dacie (suma wartości z kolumny kwh)
+
 ##### Korelacja między zmiennymi
 
 Odfiltrowanie daty, aby zostały same numeryczne wartości
-
 Macierz korelacji jest symetryczna, więc dla czytelności usuwamy górny trójkąt
 
 ``` r
@@ -159,4 +453,4 @@ ggplot(data = correlations_melt, aes(Var1, Var2, fill = value)) +
   coord_fixed()
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-2-1.png)
+![](README_files/figure-markdown_github/unnamed-chunk-5-1.png)
