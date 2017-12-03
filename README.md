@@ -154,48 +154,277 @@ ncol(data)
 ##### Typy kolumn
 
 ``` r
-sapply(data, class)
+pander::pander(sapply(data, class))
 ```
 
-    ##                   id               idsito              idmodel 
-    ##            "integer"            "numeric"            "numeric" 
-    ##              idbrand                  lat                  lon 
-    ##            "numeric"            "numeric"            "numeric" 
-    ##          ageinmonths                 anno                  day 
-    ##            "numeric"            "integer"            "numeric" 
-    ##                  ora                 data temperatura_ambiente 
-    ##            "numeric"             "factor"            "numeric" 
-    ##         irradiamento             pressure            windspeed 
-    ##            "numeric"            "numeric"            "numeric" 
-    ##             humidity                 icon             dewpoint 
-    ##            "numeric"            "numeric"            "numeric" 
-    ##          windbearing           cloudcover                tempi 
-    ##            "numeric"            "numeric"            "numeric" 
-    ##                 irri            pressurei           windspeedi 
-    ##            "numeric"            "numeric"            "numeric" 
-    ##            humidityi            dewpointi         windbearingi 
-    ##            "numeric"            "numeric"            "numeric" 
-    ##          cloudcoveri                 dist             altitude 
-    ##            "numeric"            "numeric"            "numeric" 
-    ##              azimuth            altitudei             azimuthi 
-    ##            "numeric"            "numeric"            "numeric" 
-    ##                pcnm1                pcnm2                pcnm3 
-    ##            "numeric"            "numeric"            "numeric" 
-    ##                pcnm4                pcnm5                pcnm6 
-    ##            "numeric"            "numeric"            "numeric" 
-    ##                pcnm7                pcnm8                pcnm9 
-    ##            "numeric"            "numeric"            "numeric" 
-    ##               pcnm10               pcnm11               pcnm12 
-    ##            "numeric"            "numeric"            "numeric" 
-    ##               pcnm13               pcnm14               pcnm15 
-    ##            "numeric"            "numeric"            "numeric" 
-    ##        irr_pvgis_mod       irri_pvgis_mod                  kwh 
-    ##            "numeric"            "numeric"            "numeric"
+<table>
+<caption>Table continues below</caption>
+<colgroup>
+<col width="13%" />
+<col width="13%" />
+<col width="13%" />
+<col width="13%" />
+<col width="13%" />
+<col width="13%" />
+<col width="17%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">id</th>
+<th align="center">idsito</th>
+<th align="center">idmodel</th>
+<th align="center">idbrand</th>
+<th align="center">lat</th>
+<th align="center">lon</th>
+<th align="center">ageinmonths</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">integer</td>
+<td align="center">numeric</td>
+<td align="center">numeric</td>
+<td align="center">numeric</td>
+<td align="center">numeric</td>
+<td align="center">numeric</td>
+<td align="center">numeric</td>
+</tr>
+</tbody>
+</table>
+
+<table>
+<caption>Table continues below</caption>
+<colgroup>
+<col width="13%" />
+<col width="13%" />
+<col width="13%" />
+<col width="11%" />
+<col width="30%" />
+<col width="18%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">anno</th>
+<th align="center">day</th>
+<th align="center">ora</th>
+<th align="center">data</th>
+<th align="center">temperatura_ambiente</th>
+<th align="center">irradiamento</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">integer</td>
+<td align="center">numeric</td>
+<td align="center">numeric</td>
+<td align="center">factor</td>
+<td align="center">numeric</td>
+<td align="center">numeric</td>
+</tr>
+</tbody>
+</table>
+
+<table style="width:94%;">
+<caption>Table continues below</caption>
+<colgroup>
+<col width="15%" />
+<col width="16%" />
+<col width="15%" />
+<col width="13%" />
+<col width="15%" />
+<col width="18%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">pressure</th>
+<th align="center">windspeed</th>
+<th align="center">humidity</th>
+<th align="center">icon</th>
+<th align="center">dewpoint</th>
+<th align="center">windbearing</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">numeric</td>
+<td align="center">numeric</td>
+<td align="center">numeric</td>
+<td align="center">numeric</td>
+<td align="center">numeric</td>
+<td align="center">numeric</td>
+</tr>
+</tbody>
+</table>
+
+<table style="width:99%;">
+<caption>Table continues below</caption>
+<colgroup>
+<col width="18%" />
+<col width="13%" />
+<col width="13%" />
+<col width="16%" />
+<col width="18%" />
+<col width="18%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">cloudcover</th>
+<th align="center">tempi</th>
+<th align="center">irri</th>
+<th align="center">pressurei</th>
+<th align="center">windspeedi</th>
+<th align="center">humidityi</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">numeric</td>
+<td align="center">numeric</td>
+<td align="center">numeric</td>
+<td align="center">numeric</td>
+<td align="center">numeric</td>
+<td align="center">numeric</td>
+</tr>
+</tbody>
+</table>
+
+<table>
+<caption>Table continues below</caption>
+<colgroup>
+<col width="16%" />
+<col width="20%" />
+<col width="19%" />
+<col width="13%" />
+<col width="15%" />
+<col width="15%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">dewpointi</th>
+<th align="center">windbearingi</th>
+<th align="center">cloudcoveri</th>
+<th align="center">dist</th>
+<th align="center">altitude</th>
+<th align="center">azimuth</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">numeric</td>
+<td align="center">numeric</td>
+<td align="center">numeric</td>
+<td align="center">numeric</td>
+<td align="center">numeric</td>
+<td align="center">numeric</td>
+</tr>
+</tbody>
+</table>
+
+<table style="width:100%;">
+<caption>Table continues below</caption>
+<colgroup>
+<col width="16%" />
+<col width="15%" />
+<col width="13%" />
+<col width="13%" />
+<col width="13%" />
+<col width="13%" />
+<col width="13%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">altitudei</th>
+<th align="center">azimuthi</th>
+<th align="center">pcnm1</th>
+<th align="center">pcnm2</th>
+<th align="center">pcnm3</th>
+<th align="center">pcnm4</th>
+<th align="center">pcnm5</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">numeric</td>
+<td align="center">numeric</td>
+<td align="center">numeric</td>
+<td align="center">numeric</td>
+<td align="center">numeric</td>
+<td align="center">numeric</td>
+<td align="center">numeric</td>
+</tr>
+</tbody>
+</table>
+
+<table>
+<caption>Table continues below</caption>
+<colgroup>
+<col width="12%" />
+<col width="12%" />
+<col width="12%" />
+<col width="12%" />
+<col width="12%" />
+<col width="12%" />
+<col width="12%" />
+<col width="12%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">pcnm6</th>
+<th align="center">pcnm7</th>
+<th align="center">pcnm8</th>
+<th align="center">pcnm9</th>
+<th align="center">pcnm10</th>
+<th align="center">pcnm11</th>
+<th align="center">pcnm12</th>
+<th align="center">pcnm13</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">numeric</td>
+<td align="center">numeric</td>
+<td align="center">numeric</td>
+<td align="center">numeric</td>
+<td align="center">numeric</td>
+<td align="center">numeric</td>
+<td align="center">numeric</td>
+<td align="center">numeric</td>
+</tr>
+</tbody>
+</table>
+
+<table style="width:86%;">
+<colgroup>
+<col width="13%" />
+<col width="13%" />
+<col width="22%" />
+<col width="23%" />
+<col width="12%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">pcnm14</th>
+<th align="center">pcnm15</th>
+<th align="center">irr_pvgis_mod</th>
+<th align="center">irri_pvgis_mod</th>
+<th align="center">kwh</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">numeric</td>
+<td align="center">numeric</td>
+<td align="center">numeric</td>
+<td align="center">numeric</td>
+<td align="center">numeric</td>
+</tr>
+</tbody>
+</table>
 
 ##### Liczba różnych wartości kolumn
 
 ``` r
-pander::pander(rapply(data, function(x) length(unique(x))))
+pander::pander(sapply(data, function(x) length(unique(x))))
 ```
 
 <table>
@@ -477,7 +706,7 @@ idsito, idmodel i idbrand są znormalizowanymi identyfikatorami miejsca modelu i
 liczba różnych wartości jakie przyjmują:
 
 ``` r
-rapply(data[, names(data) %in% c('idsito', 'idmodel', 'idbrand')], function(x) length(unique(x)))
+sapply(data[, names(data) %in% c('idsito', 'idmodel', 'idbrand')], function(x) length(unique(x)))
 ```
 
     ##  idsito idmodel idbrand 
@@ -543,7 +772,7 @@ ggplot(data = correlations_melt, aes(Var1, Var2, fill = value)) +
 ##### Kolejny wykres korelacji - tym razem tylko dla skorelowanych dodanio / ujmenie powyżej pewnego progu
 
 ``` r
-top_correlatinons <- correlations_melt %>% filter(abs(value) > 0.3) %>% filter(Var1 != Var2)
+top_correlatinons <- correlations_melt %>% filter(abs(value) > 0.3, Var1 != Var2)
 ggplot(data = top_correlatinons, aes(Var1, Var2, fill = value)) + 
   geom_tile(color = "white") + 
   scale_fill_gradient2(low="blue", mid="white", high="red", midpoint=0, limit=c(-1,1)) + 

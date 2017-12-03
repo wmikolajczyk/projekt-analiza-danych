@@ -42,12 +42,12 @@ ncol(data)
 ```
 ##### Typy kolumn
 ```{r}
-sapply(data, class)
+pander::pander(sapply(data, class))
 ```
 
 ##### Liczba różnych wartości kolumn
 ```{r}
-pander::pander(rapply(data, function(x) length(unique(x))))
+pander::pander(sapply(data, function(x) length(unique(x))))
 ```
 
 ##### Rozkład wartości poszczególnych atrybutów
@@ -72,7 +72,7 @@ idbrand - id marki
 idsito, idmodel i idbrand są znormalizowanymi identyfikatorami miejsca modelu i marki  
 liczba różnych wartości jakie przyjmują:
 ```{r}
-rapply(data[, names(data) %in% c('idsito', 'idmodel', 'idbrand')], function(x) length(unique(x)))
+sapply(data[, names(data) %in% c('idsito', 'idmodel', 'idbrand')], function(x) length(unique(x)))
 ```
 
 lat - lattitude, szerokość geograficzna  
@@ -129,7 +129,7 @@ ggplot(data = correlations_melt, aes(Var1, Var2, fill = value)) +
 
 ##### Kolejny wykres korelacji - tym razem tylko dla skorelowanych dodanio / ujmenie powyżej pewnego progu
 ```{r fig.width=9, fig.height=9}
-top_correlatinons <- correlations_melt %>% filter(abs(value) > 0.3) %>% filter(Var1 != Var2)
+top_correlatinons <- correlations_melt %>% filter(abs(value) > 0.3, Var1 != Var2)
 ggplot(data = top_correlatinons, aes(Var1, Var2, fill = value)) + 
   geom_tile(color = "white") + 
   scale_fill_gradient2(low="blue", mid="white", high="red", midpoint=0, limit=c(-1,1)) + 
