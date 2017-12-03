@@ -3,6 +3,18 @@ Projekt analiza danych
 Wojciech Mikołajczyk
 December 2, 2017
 
+-   [TODO: spis treści](#todo-spis-treści)
+-   [TODO: rozdział podsumowujący
+    analizę](#todo-rozdział-podsumowujący-analizę)
+-   [Wykorzystane biblioteki](#wykorzystane-biblioteki)
+-   [Wczytanie danych z pliku](#wczytanie-danych-z-pliku)
+-   [Krótkie podsumowanie danych w
+    zbiorze](#krótkie-podsumowanie-danych-w-zbiorze)
+-   [Opis kolumn](#opis-kolumn)
+-   [Brakujące wartości - ciągi 0 w różnych kolumnach - co z tym
+    zrobić?](#brakujące-wartości---ciągi-0-w-różnych-kolumnach---co-z-tym-zrobić)
+-   [Korelacja między zmiennymi](#korelacja-między-zmiennymi)
+
 ### TODO: spis treści
 
 ### TODO: rozdział podsumowujący analizę
@@ -691,18 +703,21 @@ ggplot(data = melt(data), mapping = aes(x = value)) +
 
 ![](README_files/figure-markdown_github/unnamed-chunk-5-1.png)
 
-##### Opis kolumn
+### Opis kolumn
 
-Dane są z ogniw fotowoltaicznych umieszczonych we Włoszech, to tłumaczy dlaczego część kolumn w pliku z danymi ma włoskie nazwy.
-Zbiór danych opisany jest przy użyciu 51 kolumn.
-Wszystkie kolumny poza kolumnami 'id', 'data' oraz 'anno' mają wartości liczbowe i są znormalizowane.
+Dane są z ogniw fotowoltaicznych umieszczonych we Włoszech, to tłumaczy
+dlaczego część kolumn w pliku z danymi ma włoskie nazwy.  
+Zbiór danych opisany jest przy użyciu 51 kolumn.  
+Wszystkie kolumny poza kolumnami 'id', 'data' oraz 'anno' mają wartości
+liczbowe i są znormalizowane.
 
-id - identyfikator
-idsito - id miejsca
-idmodel - id modelu
+id - identyfikator  
+idsito - id miejsca  
+idmodel - id modelu  
 idbrand - id marki
 
-idsito, idmodel i idbrand są znormalizowanymi identyfikatorami miejsca modelu i marki
+idsito, idmodel i idbrand są znormalizowanymi identyfikatorami miejsca
+modelu i marki  
 liczba różnych wartości jakie przyjmują:
 
 ``` r
@@ -712,46 +727,56 @@ sapply(data[, names(data) %in% c('idsito', 'idmodel', 'idbrand')], function(x) l
     ##  idsito idmodel idbrand 
     ##      17      11       6
 
-lat - lattitude, szerokość geograficzna
-lon - longitude, długość geograficzna
-ageinmonths - wiek w miesiącach?
-anno - rok
-day - dzien (przyjmuje 365 różnych wartości, więc wszystko się zgadza)
-ora - teraz ?
-data - data i czas w formacie MM/DD/YYYY HH:MM, od 1/2/2012 2:00 do 12/31/2013 20:00
-pomiary są zapisane od 2:00 do 20:00 - dlaczego? przecież latem słońce świeci dłużej
-można uzyskać ilość energii wytworzonej w ciągu godziny poprzez grupowanie po dacie (suma wartości z kolumny kwh)
-dlaczego jest 17 wpisów na jedną godzinę? "Każdy wiersz w zbiorze danych zawiera uśrednione informacje z jednej godziny pomiarów pojedynczej jednostki fotowoltaicznej"
-temperatura\_ambiente - temperatura otoczenia, spodziewamy się, że to może wpływać na wytwarzaną ilość energii
-irradiamento - promieniowanie
-pressure - ciśnienie
-windspeed - prędkość wiatru
-humidity - wilgotność
-icon - ikona ?
-dewpoint - temperatura punktu rosy (znormalizowana)
-windbearing - łożysko wiatrowe ?
-cloud cover - zachmurzenie
-tempi -&gt; cloudcoveri - duplikacja kolumn temperatura\_ambiente -&gt; cloudcover tylko kolumny nazwane po włosku? - inne wartości
-dist - distance ?
-altitude - wysokość
-azimuth - azymut
-altitudei -&gt; azimuthi - odpowiedniki włoskie altitude i azimuth - inne wartości
-pcnm1 -&gt; pcnm15 - jakieś pomiary z jakichś czujników
-irr\_pvgis\_mod - ?
-irri\_pvgis\_mod - ?
+lat - lattitude, szerokość geograficzna  
+lon - longitude, długość geograficzna  
+ageinmonths - wiek w miesiącach?  
+anno - rok  
+day - dzien (przyjmuje 365 różnych wartości, więc wszystko się zgadza)  
+ora - teraz ?  
+data - data i czas w formacie MM/DD/YYYY HH:MM, od 1/2/2012 2:00 do
+12/31/2013 20:00  
+pomiary są zapisane od 2:00 do 20:00 - dlaczego? przecież latem słońce
+świeci dłużej  
+można uzyskać ilość energii wytworzonej w ciągu godziny poprzez
+grupowanie po dacie (suma wartości z kolumny kwh)  
+dlaczego jest 17 wpisów na jedną godzinę? "Każdy wiersz w zbiorze danych
+zawiera uśrednione informacje z jednej godziny pomiarów pojedynczej
+jednostki fotowoltaicznej"  
+temperatura\_ambiente - temperatura otoczenia, spodziewamy się, że to
+może wpływać na wytwarzaną ilość energii  
+irradiamento - promieniowanie  
+pressure - ciśnienie  
+windspeed - prędkość wiatru  
+humidity - wilgotność  
+icon - ikona ?  
+dewpoint - temperatura punktu rosy (znormalizowana)  
+windbearing - łożysko wiatrowe ?  
+cloud cover - zachmurzenie  
+tempi -&gt; cloudcoveri - duplikacja kolumn temperatura\_ambiente -&gt;
+cloudcover tylko kolumny nazwane po włosku? - inne wartości  
+dist - distance ?  
+altitude - wysokość  
+azimuth - azymut  
+altitudei -&gt; azimuthi - odpowiedniki włoskie altitude i azimuth -
+inne wartości  
+pcnm1 -&gt; pcnm15 - jakieś pomiary z jakichś czujników  
+irr\_pvgis\_mod - ?  
+irri\_pvgis\_mod - ?  
 kwh - wytworzone Kilowatogodziny (wartości znormalizowane)
 
-##### Brakujące wartości - ciągi 0 w różnych kolumnach - co z tym zrobić?
+### Brakujące wartości - ciągi 0 w różnych kolumnach - co z tym zrobić?
 
 ##### Przetworzenie daty na wartość liczbową
 
-data &lt;- data\[, !(names(data) %in% 'data')\]
-data*d**a**t**a* &lt; −*a**s*.*n**u**m**e**r**i**c*(*a**s*.*P**O**S**I**X**c**t*(*d**a**t**a*data, format="%m/%d/%Y %H:%M"))
+data &lt;- data\[, !(names(data) %in% 'data')\]  
+data*d**a**t**a* &lt; −*a**s*.*n**u**m**e**r**i**c*(*a**s*.*P**O**S**I**X**c**t*(*d**a**t**a*data,
+format="%m/%d/%Y %H:%M"))
 
-##### Korelacja między zmiennymi
+### Korelacja między zmiennymi
 
-Odfiltrowanie daty, aby zostały same numeryczne wartości
-Macierz korelacji jest symetryczna, więc dla czytelności usuwamy górny trójkąt
+Odfiltrowanie daty, aby zostały same numeryczne wartości  
+Macierz korelacji jest symetryczna, więc dla czytelności usuwamy górny
+trójkąt
 
 ``` r
 data$data <- as.numeric(as.POSIXct(data$data, format="%m/%d/%Y %H:%M"))
