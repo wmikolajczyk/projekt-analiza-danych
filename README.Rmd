@@ -177,8 +177,8 @@ data <- data %>%
   mutate(date_year_month=format(as.POSIXct(date, format='%m/%d/%Y %H:%M'), "%Y-%m"))
 
 data2 <- data %>% group_by(date_year_month, idsito) %>% summarise(sum_kwh=sum(kwh))
-ggplot(data = data2, mapping = aes(x=date_year_month, y=sum_kwh, color=factor(idsito))) + 
-  geom_point() +
+ggplot(data = data2, mapping = aes(x=date_year_month, y=sum_kwh, color=factor(idsito), group=factor(idsito))) + 
+  geom_line() +
   labs(title = "Wykres energii w czasie dla ogniw", x = "Data", y = "Suma wytworzonej energii[kwh]") +
   theme(axis.text.x = element_text(angle = 70, size = 8, vjust = 1, hjust = 1))
 ```
