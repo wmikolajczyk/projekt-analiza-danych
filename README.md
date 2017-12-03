@@ -433,6 +433,27 @@ ora - teraz ?
 data - data i czas w formacie MM/DD/YYYY HH:MM, od 1/2/2012 2:00 do 12/31/2013 20:00
 pomiary są zapisane od 2:00 do 20:00 - dlaczego? przecież latem słońce świeci dłużej
 można uzyskać ilość energii wytworzonej w ciągu godziny poprzez grupowanie po dacie (suma wartości z kolumny kwh)
+dlaczego jest 17 wpisów na jedną godzinę? "Każdy wiersz w zbiorze danych zawiera uśrednione informacje z jednej godziny pomiarów pojedynczej jednostki fotowoltaicznej"
+temperatura\_ambiente - temperatura otoczenia, spodziewamy się, że to może wpływać na wytwarzaną ilość energii
+irradiamento - promieniowanie
+pressure - ciśnienie
+windspeed - prędkość wiatru
+humidity - wilgotność
+icon - ikona ?
+dewpoint - temperatura punktu rosy (znormalizowana)
+windbearing - łożysko wiatrowe ?
+cloud cover - zachmurzenie
+tempi -&gt; cloudcoveri - duplikacja kolumn temperatura\_ambiente -&gt; cloudcover tylko kolumny nazwane po włosku? - inne wartości
+dist - distance ?
+altitude - wysokość
+azimuth - azymut
+altitudei -&gt; azimuthi - odpowiedniki włoskie altitude i azimuth - inne wartości
+pcnm1 -&gt; pcnm15 - jakieś pomiary z jakichś czujników
+irr\_pvgis\_mod - ?
+irri\_pvgis\_mod - ?
+kwh - wytworzone Kilowatogodziny (wartości znormalizowane)
+
+##### Brakujące wartości - ciągi 0 w różnych kolumnach - co z tym zrobić?
 
 ##### Korelacja między zmiennymi
 
