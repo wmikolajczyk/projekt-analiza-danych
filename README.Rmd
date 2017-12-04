@@ -128,6 +128,9 @@ pressure - nie powinno być, chyba, że kodowanie?
 power_stations <- power_stations[, !(names(power_stations) %in% c('id'))]
 ```
 #### 2. Uzupełnienie brakujących wartości
+```{r}
+c(sum(power_stations$irradiamento == 0), sum(power_stations$kwh == 0))
+```
 ```{r fix values}
 # pressure
 power_stations$pressure <- ifelse(power_stations$pressure == 0, mean(power_stations$pressure), power_stations$pressure)
@@ -135,6 +138,9 @@ power_stations$pressure <- ifelse(power_stations$pressure == 0, mean(power_stati
 power_stations$irradiamento <- ifelse(power_stations$irradiamento == 0 & power_stations$kwh != 0, mean(power_stations$irradiamento), power_stations$irradiamento)
 # kwh based on irradiamento
 power_stations$kwh <- ifelse(power_stations$kwh == 0 & power_stations$irradiamento != 0, mean(power_stations$kwh), power_stations$kwh)
+```
+```{r}
+c(sum(power_stations$irradiamento == 0), sum(power_stations$kwh == 0))
 ```
 
 ### Korelacja zmiennych

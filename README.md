@@ -385,13 +385,19 @@ pressure - nie powinno być, chyba, że kodowanie?
 
 ### Przygotowanie danych
 
-#### 1. Usunięcie niepotrzebnych kolumn
+#### 1. Usunięcie niepotrzebnej kolumny id
 
 ``` r
 power_stations <- power_stations[, !(names(power_stations) %in% c('id'))]
 ```
 
 #### 2. Uzupełnienie brakujących wartości
+
+``` r
+c(sum(power_stations$irradiamento == 0), sum(power_stations$kwh == 0))
+```
+
+    ## [1] 78489 78521
 
 ``` r
 # pressure
@@ -401,6 +407,12 @@ power_stations$irradiamento <- ifelse(power_stations$irradiamento == 0 & power_s
 # kwh based on irradiamento
 power_stations$kwh <- ifelse(power_stations$kwh == 0 & power_stations$irradiamento != 0, mean(power_stations$kwh), power_stations$kwh)
 ```
+
+``` r
+c(sum(power_stations$irradiamento == 0), sum(power_stations$kwh == 0))
+```
+
+    ## [1] 72864 72864
 
 ### Korelacja zmiennych
 
@@ -423,7 +435,7 @@ ggplot(data = correlations_melt, aes(Var1, Var2, fill = value)) +
   coord_fixed()
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-2-1.png)
+![](README_files/figure-markdown_github/unnamed-chunk-4-1.png)
 
 #### 2. Wykres korelacji między zmiennymi dla wartości bezwzględnej korelacji &gt; 0.5 z pominięciem korelacji zmiennej względem samej siebie
 
@@ -438,7 +450,7 @@ ggplot(data = top_correlatinons, aes(Var1, Var2, fill = value)) +
   coord_fixed()
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-3-1.png)
+![](README_files/figure-markdown_github/unnamed-chunk-5-1.png)
 
 #### 3. Wykres korelacji atrybutów do kwh
 
@@ -451,7 +463,7 @@ ggplot(data = kwh_correlations, mapping = aes(x=rownames(kwh_correlations), y=va
   theme_bw()
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-4-1.png)
+![](README_files/figure-markdown_github/unnamed-chunk-6-1.png)
 
 ### Wykres - zmiana wytwarzanej energii przez ogniwa w czasie i przestrzeni
 
@@ -464,7 +476,7 @@ ggplot(data = energy_sito_date, mapping = aes(x=date_year_month, y=sum_kwh, colo
   theme(axis.text.x = element_text(angle = 70, size = 8, vjust = 1, hjust = 1))
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-5-1.png)
+![](README_files/figure-markdown_github/unnamed-chunk-7-1.png)
 
 ### Regresor
 
