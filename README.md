@@ -3,7 +3,7 @@ Projekt analiza danych
 Wojciech Mikołajczyk
 December 2, 2017
 
--   [TODO: podsumowanie analizy](#todo-podsumowanie-analizy)
+-   [Podsumowanie analizy](#podsumowanie-analizy)
 -   [Wykorzystane biblioteki](#wykorzystane-biblioteki)
 -   [Podsumowanie danych w zbiorze](#podsumowanie-danych-w-zbiorze)
 -   [Opis danych](#opis-danych)
@@ -13,7 +13,26 @@ December 2, 2017
     przestrzeni](#wykres---zmiana-wytwarzanej-energii-przez-ogniwa-w-czasie-i-przestrzeni)
 -   [Regresor](#regresor)
 
-### TODO: podsumowanie analizy
+### Podsumowanie analizy
+
+W analizowanym zbiorze danych pomimo dużej liczby atrybutów, tylko kilka
+z nich jest silnie skorelowanych z ilością wytwarzanej energii przez
+ogniwa fotowoltaiczne. Wszystkie wartości numeryczne są znormalizowane,
+przez co odczytanie i interpretacja wartości kolumn opisujących dni, czy
+godziny wymagało przejrzenia zmienności tych wartości w zbiorze oraz ich
+zależności względem innych kolumn.  
+Dane opisują pomiary z 17 ogniw fotowoltaicznych. Część pomiarów jest
+błędnie odczytana jako 0, możliwe, że z powodu awarii czujnika, lub
+przyczyn losowych. Najmocniej skorelowane są kolumny opisujące
+promieniowanie i ilość wytwarzanej energii przez ogniwa. W tych
+kolumnach wartości zerowe zostały uzupełnione w sposób bazujący na
+wartości drugiej skorelowanej kolumny.  
+Na wykresie przedstawiającym ilość wytworzonej energii w osi czasu widać
+wyraźnie, że w miesiącach letnich wartości są wyraźnie wyższe niż w
+zimowych. Jest to zgodne z intuicyjnymi oczekiwaniami.  
+Jako regresor został wykorzystany model Random Forest operujący na
+danych okrojonych do najbardziej skorelowanych kolumn z kolumną 'kwh'.
+Zbiór danych został podzielony na treningowy, walidujący i testujący.
 
 ### Wykorzystane biblioteki
 
@@ -349,10 +368,10 @@ day - dzien (przyjmuje 365 różnych wartości, więc wszystko się zgadza)
 ora - godzina (0 dla godz. 2:00, rośnie do 1 dla godz 20:00 czyli końca
 pomiarów) data - data i czas w formacie MM/DD/YYYY HH:MM, od 1/2/2012
 2:00 do 12/31/2013 20:00  
-temperatura\_ambiente - temperatura otoczenia, prawdopodobnie będzie
-wpływać na ilość wytwarzanej energii  
+temperatura\_ambiente - temperatura otoczenia  
 irradiamento - promieniowanie, prawdopodobnie będzie wpływać na ilość
-wytwarzanej energii pressure - ciśnienie  
+wytwarzanej energii  
+pressure - ciśnienie  
 windspeed - prędkość wiatru  
 humidity - wilgotność  
 icon - ikona ?  
@@ -379,10 +398,6 @@ Na podstawie tego, że dla każdej godziny jest 17 pomiarów, można
 wywnioskować, że pomiary pochodzą właśnie z 17 jednostek
 fotowoltaicznych. Pierwsze kolumny opisują ogniwa ('idsito', 'idmodel',
 'idbrand', 'lat', 'lon', 'ageinmonths').
-
-Wartości zerowe  
-irradiamento - mogą być (noc)  
-pressure - nie powinno być, chyba, że kodowanie?
 
 ### Przygotowanie danych
 
@@ -414,6 +429,10 @@ c(sum(power_stations$irradiamento == 0), sum(power_stations$kwh == 0))
 ```
 
     ## [1] 72864 72864
+
+Zerowe wartości kolumn 'irradiamento' (promieniowanie) oraz 'kwh'
+zostały uzupełnione średnią z danej kolumny w przypadku gdy jedna z tych
+kolumn ma wartość 0 a druga ma wartość niezerową.
 
 ### Korelacja zmiennych
 
@@ -481,20 +500,25 @@ ggplot(data = energy_sito_date, mapping = aes(x=date_year_month, y=sum_kwh, colo
 
 ### Regresor
 
-Do utworzenia regresora użyte zostaną najbardziej skorelowane
-(pozytywnie lub negatywnie) atrybuty
+Do utworzenia regresora użyte zostaną najbardziej skorelowane atrybuty
 
 ``` r
-power_stations_sample <- power_stations %>% select(idsito, irradiamento, irr_pvgis_mod, altitude, irri, tempi, kwh)
+power_stations_for_model <- sample_n(power_stations %>% select(idsito, irradiamento, irr_pvgis_mod, humidity, azimuthi, altitude, irri, tempi, ora, day, kwh), 50000)
+
 set.seed(93)
 inTraining <- 
     createDataPartition(
-        y = power_stations_sample$idsito,
+        y = power_stations_for_model$idsito,
         p = .85,
         list = FALSE)
 
-training <- power_stations_sample[ inTraining,]
-testing  <- power_stations_sample[-inTraining,]
+training <- power_stations_for_model[ inTraining,]
+
+validation_testing <- power_stations_for_model[-inTraining,]
+validation_testing <- split(validation_testing, rep(c('validation', 'testing'), each=nrow(validation_testing)/2))
+
+validation <- validation_testing$validation
+testing  <- validation_testing$testing
 
 ctrl <- trainControl(
     method = "repeatedcv",
@@ -502,37 +526,47 @@ ctrl <- trainControl(
     repeats = 2)
 
 set.seed(93)
-fit <- train(kwh ~ .,
+my_model <- train(kwh ~ .,
              data = training,
              method = "rf",
              trControl = ctrl,
              ntree = 25)
-fit
+my_model
 ```
 
     ## Random Forest 
     ## 
-    ## 200422 samples
-    ##      6 predictors
+    ## 42502 samples
+    ##    10 predictors
     ## 
     ## No pre-processing
     ## Resampling: Cross-Validated (2 fold, repeated 2 times) 
-    ## Summary of sample sizes: 100211, 100211, 100212, 100210 
+    ## Summary of sample sizes: 21251, 21251, 21252, 21250 
     ## Resampling results across tuning parameters:
     ## 
     ##   mtry  RMSE        Rsquared   MAE       
-    ##   2     0.06970211  0.8888622  0.03467843
-    ##   4     0.07002314  0.8877565  0.03414067
-    ##   6     0.07088916  0.8849391  0.03441209
+    ##    2    0.06820104  0.8931591  0.03585424
+    ##    6    0.06703653  0.8964805  0.03386853
+    ##   10    0.06799901  0.8933651  0.03413263
     ## 
     ## RMSE was used to select the optimal model using  the smallest value.
-    ## The final value used for the model was mtry = 2.
+    ## The final value used for the model was mtry = 6.
 
 ``` r
-my_pred <- predict(fit, newdata = testing)
+my_pred <- predict(my_model, newdata = validation)
+defaultSummary(data.frame(pred = my_pred, obs = validation$kwh))
+```
 
+    ##       RMSE   Rsquared        MAE 
+    ## 0.06941599 0.89134442 0.03253859
+
+``` r
+my_pred <- predict(my_model, newdata = testing)
 defaultSummary(data.frame(pred = my_pred, obs = testing$kwh))
 ```
 
     ##       RMSE   Rsquared        MAE 
-    ## 0.06783002 0.89444675 0.03282992
+    ## 0.06271518 0.90949902 0.03080102
+
+Strojenie parametrów modelu odbyło się w oparciu o walidacyjny zbiór
+danych.

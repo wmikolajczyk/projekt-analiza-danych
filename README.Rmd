@@ -8,7 +8,11 @@ output:
     hard_line_breaks: false
 ---
 
-### TODO: podsumowanie analizy
+### Podsumowanie analizy
+W analizowanym zbiorze danych pomimo dużej liczby atrybutów, tylko kilka z nich jest silnie skorelowanych z ilością wytwarzanej energii przez ogniwa fotowoltaiczne. Wszystkie wartości numeryczne są znormalizowane, przez co odczytanie i interpretacja wartości kolumn opisujących dni, czy godziny wymagało przejrzenia zmienności tych wartości w zbiorze oraz ich zależności względem innych kolumn.  
+Dane opisują pomiary z 17 ogniw fotowoltaicznych. Część pomiarów jest błędnie odczytana jako 0, możliwe, że z powodu awarii czujnika, lub przyczyn losowych. Najmocniej skorelowane są kolumny opisujące promieniowanie i ilość wytwarzanej energii przez ogniwa. W tych kolumnach wartości zerowe zostały uzupełnione w sposób bazujący na wartości drugiej skorelowanej kolumny.  
+Na wykresie przedstawiającym ilość wytworzonej energii w osi czasu widać wyraźnie, że w miesiącach letnich wartości są wyraźnie wyższe niż w zimowych. Jest to zgodne z intuicyjnymi oczekiwaniami.  
+Jako regresor został wykorzystany model Random Forest operujący na danych okrojonych do najbardziej skorelowanych kolumn z kolumną 'kwh'. Zbiór danych został podzielony na treningowy, walidujący i testujący.
 
 ### Wykorzystane biblioteki
 ```{r load libraries, message=FALSE}
@@ -97,8 +101,8 @@ anno - rok
 day - dzien (przyjmuje 365 różnych wartości, więc wszystko się zgadza)  
 ora - godzina (0 dla godz. 2:00, rośnie do 1 dla godz 20:00 czyli końca pomiarów)
 data - data i czas w formacie MM/DD/YYYY HH:MM, od 1/2/2012 2:00 do 12/31/2013 20:00   
-temperatura_ambiente - temperatura otoczenia, prawdopodobnie będzie wpływać na ilość wytwarzanej energii   
-irradiamento - promieniowanie, prawdopodobnie będzie wpływać na ilość wytwarzanej energii
+temperatura_ambiente - temperatura otoczenia  
+irradiamento - promieniowanie, prawdopodobnie będzie wpływać na ilość wytwarzanej energii  
 pressure - ciśnienie  
 windspeed - prędkość wiatru   
 humidity - wilgotność  
@@ -118,10 +122,6 @@ kwh - wytworzone Kilowatogodziny (wartości znormalizowane)
 
 Na podstawie tego, że dla każdej godziny jest 17 pomiarów, można wywnioskować, że pomiary pochodzą właśnie z 17 jednostek fotowoltaicznych. 
 Pierwsze kolumny opisują ogniwa ('idsito', 'idmodel', 'idbrand', 'lat', 'lon', 'ageinmonths').
-
-Wartości zerowe  
-irradiamento - mogą być (noc)  
-pressure - nie powinno być, chyba, że kodowanie? 
 
 ### Przygotowanie danych
 #### 1. Usunięcie niepotrzebnej kolumny id
@@ -143,6 +143,7 @@ power_stations$kwh <- ifelse(power_stations$kwh == 0 & power_stations$irradiamen
 ```{r}
 c(sum(power_stations$irradiamento == 0), sum(power_stations$kwh == 0))
 ```
+Zerowe wartości kolumn 'irradiamento' (promieniowanie) oraz 'kwh' zostały uzupełnione średnią z danej kolumny w przypadku gdy jedna z tych kolumn ma wartość 0 a druga ma wartość niezerową.  
 
 ### Korelacja zmiennych
 #### 1. Wykres korelacji między zmiennymi
@@ -196,18 +197,24 @@ ggplot(data = energy_sito_date, mapping = aes(x=date_year_month, y=sum_kwh, colo
 ```
 
 ### Regresor
-Do utworzenia regresora użyte zostaną najbardziej skorelowane (pozytywnie lub negatywnie) atrybuty  
+Do utworzenia regresora użyte zostaną najbardziej skorelowane atrybuty  
 ```{r regressor, cache=TRUE}
-power_stations_sample <- power_stations %>% select(idsito, irradiamento, irr_pvgis_mod, altitude, irri, tempi, kwh)
+power_stations_for_model <- sample_n(power_stations %>% select(idsito, irradiamento, irr_pvgis_mod, humidity, azimuthi, altitude, irri, tempi, ora, day, kwh), 50000)
+
 set.seed(93)
 inTraining <- 
     createDataPartition(
-        y = power_stations_sample$idsito,
+        y = power_stations_for_model$idsito,
         p = .85,
         list = FALSE)
 
-training <- power_stations_sample[ inTraining,]
-testing  <- power_stations_sample[-inTraining,]
+training <- power_stations_for_model[ inTraining,]
+
+validation_testing <- power_stations_for_model[-inTraining,]
+validation_testing <- split(validation_testing, rep(c('validation', 'testing'), each=nrow(validation_testing)/2))
+
+validation <- validation_testing$validation
+testing  <- validation_testing$testing
 
 ctrl <- trainControl(
     method = "repeatedcv",
@@ -215,13 +222,19 @@ ctrl <- trainControl(
     repeats = 2)
 
 set.seed(93)
-fit <- train(kwh ~ .,
+my_model <- train(kwh ~ .,
              data = training,
              method = "rf",
              trControl = ctrl,
              ntree = 25)
-fit
-my_pred <- predict(fit, newdata = testing)
+my_model
 
+my_pred <- predict(my_model, newdata = validation)
+defaultSummary(data.frame(pred = my_pred, obs = validation$kwh))
+
+my_pred <- predict(my_model, newdata = testing)
 defaultSummary(data.frame(pred = my_pred, obs = testing$kwh))
 ```
+
+Strojenie parametrów modelu odbyło się w oparciu o walidacyjny zbiór danych.
+
