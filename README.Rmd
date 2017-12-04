@@ -24,29 +24,29 @@ power_stations <- read.csv('elektrownie.csv')
 ```
 
 ### Podsumowanie danych w zbiorze
-##### 1. Rozmiar zbioru danych  
+#### 1. Rozmiar zbioru danych  
 ```{r dimensions}
 dimensions <- dim(power_stations)
 names(dimensions) <- c('l. wierszy', 'l. kolumn')
 dimensions
 ```
-##### 2. Podstawowe statystyki  
+#### 2. Podstawowe statystyki  
 ```{r short datasummary}
 summary(power_stations)
 ```
-##### 3. Sprawdzenie czy zbiór zawiera wartości NA  
+#### 3. Sprawdzenie czy zbiór zawiera wartości NA  
 ```{r check NA}
 any(is.na(power_stations))
 ```
-##### 4. Typy kolumn  
+#### 4. Typy kolumn  
 ```{r column types}
 sapply(power_stations, class)
 ```
-##### 5. Liczba różnych wartości w kolumnach  
+#### 5. Liczba różnych wartości w kolumnach  
 ```{r unique values in columns}
 sapply(power_stations, function(x) length(unique(x)))
 ```
-##### 6. Rozkład wartości poszczególnych atrybutów  
+#### 6. Rozkład wartości poszczególnych atrybutów  
 ```{r fig.width=9, fig.height=18, cache=TRUE}
 ggplot(data = melt(power_stations), mapping = aes(x = value)) + 
   geom_histogram(bins=50) + 
@@ -56,11 +56,11 @@ ggplot(data = melt(power_stations), mapping = aes(x = value)) +
   theme_bw()
 ```
 
-##### 7. Liczba wartości 0 w kolumnach  
+#### 7. Liczba wartości 0 w kolumnach  
 ```{r count zeros}
 sapply(power_stations, function(x) sum(x==0))
 ```
-##### 8. Poprawienie klas kolumn
+#### 8. Poprawienie klas kolumn
 ```{r fix column types}
 # to factor
 # correlations doesn't work with not numeric
@@ -70,14 +70,14 @@ sapply(power_stations, function(x) sum(x==0))
 power_stations_for_cor <- power_stations
 power_stations_for_cor$data <- as.numeric(as.POSIXlt(power_stations$data, format="%m/%d/%Y %H:%M"))
 ```
-##### 9. Uzupełnienie brakujących wartości
+#### 9. Uzupełnienie brakujących wartości
 ```{r fix values}
 # pressure
 power_stations$pressure <- ifelse(power_stations$pressure == 0, mean(power_stations$pressure), power_stations$pressure)
 ```
 
 ### Korelacja zmiennych
-##### 1. Wykres korelacji między zmiennymi
+#### 1. Wykres korelacji między zmiennymi
 ```{r fig.width=9, fig.height=9, cache=TRUE}
 correlations <- round(cor(power_stations_for_cor), 2)
 correlations[upper.tri(correlations)] <- NA
@@ -92,7 +92,7 @@ ggplot(data = correlations_melt, aes(Var1, Var2, fill = value)) +
   coord_fixed()
 ```
 
-##### 2. Wykres korelacji między zmiennymi dla wartości bezwzględnej korelacji > 0.5 z pominięciem korelacji zmiennej względem samej siebie
+#### 2. Wykres korelacji między zmiennymi dla wartości bezwzględnej korelacji > 0.5 z pominięciem korelacji zmiennej względem samej siebie
 ```{r fig.width=9, fig.height=9, cache=TRUE}
 top_correlatinons <- correlations_melt %>% filter(abs(value) > 0.5, Var1 != Var2)
 ggplot(data = top_correlatinons, aes(Var1, Var2, fill = value)) + 
@@ -104,7 +104,7 @@ ggplot(data = top_correlatinons, aes(Var1, Var2, fill = value)) +
   coord_fixed()
 ```
 
-##### 3. Wykres korelacji atrybutów do kwh
+#### 3. Wykres korelacji atrybutów do kwh
 ```{r fig.width=9, fig.height=9, cache=TRUE}
 kwh_correlations <- melt(correlations['kwh', ])
 ggplot(data = kwh_correlations, mapping = aes(x=rownames(kwh_correlations), y=value)) + 

@@ -32,7 +32,7 @@ power_stations <- read.csv('elektrownie.csv')
 
 ### Podsumowanie danych w zbiorze
 
-##### 1. Rozmiar zbioru danych
+#### 1. Rozmiar zbioru danych
 
 ``` r
 dimensions <- dim(power_stations)
@@ -43,7 +43,7 @@ dimensions
     ## l. wierszy  l. kolumn 
     ##     235790         51
 
-##### 2. Podstawowe statystyki
+#### 2. Podstawowe statystyki
 
 ``` r
 summary(power_stations)
@@ -154,7 +154,7 @@ summary(power_stations)
     ##  Max.   :1.0000   Max.   :1.0000   Max.   : 1.0060   Max.   :1.0000  
     ## 
 
-##### 3. Sprawdzenie czy zbiór zawiera wartości NA
+#### 3. Sprawdzenie czy zbiór zawiera wartości NA
 
 ``` r
 any(is.na(power_stations))
@@ -162,7 +162,7 @@ any(is.na(power_stations))
 
     ## [1] FALSE
 
-##### 4. Typy kolumn
+#### 4. Typy kolumn
 
 ``` r
 sapply(power_stations, class)
@@ -203,7 +203,7 @@ sapply(power_stations, class)
     ##        irr_pvgis_mod       irri_pvgis_mod                  kwh 
     ##            "numeric"            "numeric"            "numeric"
 
-##### 5. Liczba różnych wartości w kolumnach
+#### 5. Liczba różnych wartości w kolumnach
 
 ``` r
 sapply(power_stations, function(x) length(unique(x)))
@@ -244,7 +244,7 @@ sapply(power_stations, function(x) length(unique(x)))
     ##        irr_pvgis_mod       irri_pvgis_mod                  kwh 
     ##                  870                  752                  864
 
-##### 6. Rozkład wartości poszczególnych atrybutów
+#### 6. Rozkład wartości poszczególnych atrybutów
 
 ``` r
 ggplot(data = melt(power_stations), mapping = aes(x = value)) + 
@@ -259,7 +259,7 @@ ggplot(data = melt(power_stations), mapping = aes(x = value)) +
 
 ![](README_files/figure-markdown_github/unnamed-chunk-1-1.png)
 
-##### 7. Liczba wartości 0 w kolumnach
+#### 7. Liczba wartości 0 w kolumnach
 
 ``` r
 sapply(power_stations, function(x) sum(x==0))
@@ -300,7 +300,7 @@ sapply(power_stations, function(x) sum(x==0))
     ##        irr_pvgis_mod       irri_pvgis_mod                  kwh 
     ##                94008                    2                78521
 
-##### 8. Poprawienie klas kolumn
+#### 8. Poprawienie klas kolumn
 
 ``` r
 # to factor
@@ -312,7 +312,7 @@ power_stations_for_cor <- power_stations
 power_stations_for_cor$data <- as.numeric(as.POSIXlt(power_stations$data, format="%m/%d/%Y %H:%M"))
 ```
 
-##### 9. Uzupełnienie brakujących wartości
+#### 9. Uzupełnienie brakujących wartości
 
 ``` r
 # pressure
@@ -321,7 +321,7 @@ power_stations$pressure <- ifelse(power_stations$pressure == 0, mean(power_stati
 
 ### Korelacja zmiennych
 
-##### 1. Wykres korelacji między zmiennymi
+#### 1. Wykres korelacji między zmiennymi
 
 ``` r
 correlations <- round(cor(power_stations_for_cor), 2)
@@ -339,7 +339,7 @@ ggplot(data = correlations_melt, aes(Var1, Var2, fill = value)) +
 
 ![](README_files/figure-markdown_github/unnamed-chunk-2-1.png)
 
-##### 2. Wykres korelacji między zmiennymi dla wartości bezwzględnej korelacji &gt; 0.5 z pominięciem korelacji zmiennej względem samej siebie
+#### 2. Wykres korelacji między zmiennymi dla wartości bezwzględnej korelacji &gt; 0.5 z pominięciem korelacji zmiennej względem samej siebie
 
 ``` r
 top_correlatinons <- correlations_melt %>% filter(abs(value) > 0.5, Var1 != Var2)
@@ -354,7 +354,7 @@ ggplot(data = top_correlatinons, aes(Var1, Var2, fill = value)) +
 
 ![](README_files/figure-markdown_github/unnamed-chunk-3-1.png)
 
-##### 3. Wykres korelacji atrybutów do kwh
+#### 3. Wykres korelacji atrybutów do kwh
 
 ``` r
 kwh_correlations <- melt(correlations['kwh', ])
