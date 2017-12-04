@@ -506,26 +506,20 @@ ggplot(data = energy_sito_date, mapping = aes(x=date_year_month, y=sum_kwh, colo
 ### Regresor
 
 ``` r
-set.seed(93)
-power_stations_for_model <- sample_n(power_stations %>% select(idsito, irradiamento, irr_pvgis_mod, humidity, azimuthi, altitude, irri, tempi, ora, day, kwh), 50000)
+power_stations_for_model <- power_stations %>% select(idsito, irradiamento, irr_pvgis_mod, humidity, azimuthi, altitude, irri, tempi, ora, day, kwh)
 
 set.seed(93)
 inTraining <- 
     createDataPartition(
         y = power_stations_for_model$idsito,
-        p = .85,
+        p = .60,
         list = FALSE)
 
 training <- power_stations_for_model[ inTraining,]
 
 validation_testing <- power_stations_for_model[-inTraining,]
 validation_testing <- split(validation_testing, rep(c('validation', 'testing'), each=nrow(validation_testing)/2))
-```
 
-    ## Warning in split.default(x = seq_len(nrow(x)), f = f, drop = drop, ...):
-    ## data length is not a multiple of split variable
-
-``` r
 validation <- validation_testing$validation
 testing  <- validation_testing$testing
 
@@ -540,41 +534,23 @@ my_model <- train(kwh ~ .,
              method = "rf",
              trControl = ctrl,
              ntree = 25)
-```
-
-    ## randomForest 4.6-12
-
-    ## Type rfNews() to see new features/changes/bug fixes.
-
-    ## 
-    ## Attaching package: 'randomForest'
-
-    ## The following object is masked from 'package:ggplot2':
-    ## 
-    ##     margin
-
-    ## The following object is masked from 'package:dplyr':
-    ## 
-    ##     combine
-
-``` r
 my_model
 ```
 
     ## Random Forest 
     ## 
-    ## 42501 samples
-    ##    10 predictors
+    ## 141474 samples
+    ##     10 predictors
     ## 
     ## No pre-processing
     ## Resampling: Cross-Validated (2 fold, repeated 2 times) 
-    ## Summary of sample sizes: 21251, 21250, 21251, 21250 
+    ## Summary of sample sizes: 70737, 70737, 70737, 70737 
     ## Resampling results across tuning parameters:
     ## 
     ##   mtry  RMSE        Rsquared   MAE       
-    ##    2    0.06958317  0.8903606  0.03588139
-    ##    6    0.06853400  0.8933953  0.03422282
-    ##   10    0.06950078  0.8903002  0.03444900
+    ##    2    0.06258157  0.9106029  0.03128792
+    ##    6    0.06136118  0.9138334  0.02956568
+    ##   10    0.06198475  0.9119836  0.02964827
     ## 
     ## RMSE was used to select the optimal model using  the smallest value.
     ## The final value used for the model was mtry = 6.
@@ -585,7 +561,7 @@ defaultSummary(data.frame(pred = my_pred, obs = validation$kwh))
 ```
 
     ##       RMSE   Rsquared        MAE 
-    ## 0.06504964 0.90127669 0.03176212
+    ## 0.05046866 0.93660622 0.02478959
 
 ``` r
 my_pred <- predict(my_model, newdata = testing)
@@ -593,7 +569,7 @@ defaultSummary(data.frame(pred = my_pred, obs = testing$kwh))
 ```
 
     ##       RMSE   Rsquared        MAE 
-    ## 0.06884727 0.89189330 0.03227339
+    ## 0.06130644 0.92297535 0.02808857
 
 Jako model wybrano Random Forest. Do utworzenia regresora zostały
 wykorzystane mocno skorelowane atrybuty z atrybutem wynikowym 'kwh'.

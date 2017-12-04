@@ -200,15 +200,14 @@ ggplot(data = energy_sito_date, mapping = aes(x=date_year_month, y=sum_kwh, colo
 ```
 
 ### Regresor
-```{r regressor}
-set.seed(93)
-power_stations_for_model <- sample_n(power_stations %>% select(idsito, irradiamento, irr_pvgis_mod, humidity, azimuthi, altitude, irri, tempi, ora, day, kwh), 50000)
+```{r regressor, cache=TRUE}
+power_stations_for_model <- power_stations %>% select(idsito, irradiamento, irr_pvgis_mod, humidity, azimuthi, altitude, irri, tempi, ora, day, kwh)
 
 set.seed(93)
 inTraining <- 
     createDataPartition(
         y = power_stations_for_model$idsito,
-        p = .85,
+        p = .60,
         list = FALSE)
 
 training <- power_stations_for_model[ inTraining,]
