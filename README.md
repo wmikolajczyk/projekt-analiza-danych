@@ -506,6 +506,7 @@ ggplot(data = energy_sito_date, mapping = aes(x=date_year_month, y=sum_kwh, colo
 ### Regresor
 
 ``` r
+set.seed(93)
 power_stations_for_model <- sample_n(power_stations %>% select(idsito, irradiamento, irr_pvgis_mod, humidity, azimuthi, altitude, irri, tempi, ora, day, kwh), 50000)
 
 set.seed(93)
@@ -539,23 +540,41 @@ my_model <- train(kwh ~ .,
              method = "rf",
              trControl = ctrl,
              ntree = 25)
+```
+
+    ## randomForest 4.6-12
+
+    ## Type rfNews() to see new features/changes/bug fixes.
+
+    ## 
+    ## Attaching package: 'randomForest'
+
+    ## The following object is masked from 'package:ggplot2':
+    ## 
+    ##     margin
+
+    ## The following object is masked from 'package:dplyr':
+    ## 
+    ##     combine
+
+``` r
 my_model
 ```
 
     ## Random Forest 
     ## 
-    ## 42503 samples
+    ## 42501 samples
     ##    10 predictors
     ## 
     ## No pre-processing
     ## Resampling: Cross-Validated (2 fold, repeated 2 times) 
-    ## Summary of sample sizes: 21252, 21251, 21252, 21251 
+    ## Summary of sample sizes: 21251, 21250, 21251, 21250 
     ## Resampling results across tuning parameters:
     ## 
     ##   mtry  RMSE        Rsquared   MAE       
-    ##    2    0.06959389  0.8896546  0.03614580
-    ##    6    0.06850172  0.8928371  0.03442568
-    ##   10    0.06942115  0.8898588  0.03473377
+    ##    2    0.06958317  0.8903606  0.03588139
+    ##    6    0.06853400  0.8933953  0.03422282
+    ##   10    0.06950078  0.8903002  0.03444900
     ## 
     ## RMSE was used to select the optimal model using  the smallest value.
     ## The final value used for the model was mtry = 6.
@@ -566,7 +585,7 @@ defaultSummary(data.frame(pred = my_pred, obs = validation$kwh))
 ```
 
     ##       RMSE   Rsquared        MAE 
-    ## 0.06533809 0.90246021 0.03248373
+    ## 0.06504964 0.90127669 0.03176212
 
 ``` r
 my_pred <- predict(my_model, newdata = testing)
@@ -574,7 +593,7 @@ defaultSummary(data.frame(pred = my_pred, obs = testing$kwh))
 ```
 
     ##       RMSE   Rsquared        MAE 
-    ## 0.06261243 0.91494894 0.03206746
+    ## 0.06884727 0.89189330 0.03227339
 
 Jako model wybrano Random Forest. Do utworzenia regresora zostały
 wykorzystane mocno skorelowane atrybuty z atrybutem wynikowym 'kwh'.

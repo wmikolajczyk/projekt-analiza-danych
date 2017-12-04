@@ -200,7 +200,8 @@ ggplot(data = energy_sito_date, mapping = aes(x=date_year_month, y=sum_kwh, colo
 ```
 
 ### Regresor
-```{r regressor, cache=TRUE}
+```{r regressor}
+set.seed(93)
 power_stations_for_model <- sample_n(power_stations %>% select(idsito, irradiamento, irr_pvgis_mod, humidity, azimuthi, altitude, irri, tempi, ora, day, kwh), 50000)
 
 set.seed(93)
