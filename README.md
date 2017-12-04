@@ -6,12 +6,11 @@ December 2, 2017
 -   [TODO: podsumowanie analizy](#todo-podsumowanie-analizy)
 -   [Wykorzystane biblioteki](#wykorzystane-biblioteki)
 -   [Podsumowanie danych w zbiorze](#podsumowanie-danych-w-zbiorze)
+-   [Opis danych](#opis-danych)
 -   [Korelacja zmiennych](#korelacja-zmiennych)
 -   [Wykres - zmiana wytwarzanej energii przez ogniwa w czasie i
     przestrzeni](#wykres---zmiana-wytwarzanej-energii-przez-ogniwa-w-czasie-i-przestrzeni)
 -   [Regresor](#regresor)
--   [Opis kolumn - TODO: fix and move this section
-    up](#opis-kolumn---todo-fix-and-move-this-section-up)
 
 ### TODO: podsumowanie analizy
 
@@ -300,7 +299,63 @@ sapply(power_stations, function(x) sum(x==0))
     ##        irr_pvgis_mod       irri_pvgis_mod                  kwh 
     ##                94008                    2                78521
 
-#### 8. Poprawienie klas kolumn
+### Opis danych
+
+Dane pochodzą z ogniw fotowoltaicznych umieszczonych we Włoszech.
+Opisane są przy użyciu 51 atrybutów, z czego część ma nazwy angielskie,
+część włoskie, a kilka z nich opisana jest skrótami.  
+Wszystkie kolumny poza 'id', 'data' oraz 'anno' mają wartości liczbowe i
+są znormalizowane.
+
+Interpretacja kolumn:  
+id - identyfikator  
+idsito - id ogniwa fotowoltaicznego  
+idmodel - id modelu ogniwa fotowoltaicznego  
+idbrand - id marki ogniwa fotowoltaicznego  
+lat - szerokość geograficzna ogniwa fotowoltaicznego  
+lon - długość geograficzna ogniwa fotowoltaicznego  
+ageinmonths - wiek ogniwa fotowoltaicznego  
+anno - rok  
+day - dzien (przyjmuje 365 różnych wartości, więc wszystko się zgadza)  
+ora - godzina (0 dla godz. 2:00, rośnie do 1 dla godz 20:00 czyli końca
+pomiarów) data - data i czas w formacie MM/DD/YYYY HH:MM, od 1/2/2012
+2:00 do 12/31/2013 20:00  
+temperatura\_ambiente - temperatura otoczenia, prawdopodobnie będzie
+wpływać na ilość wytwarzanej energii  
+irradiamento - promieniowanie, prawdopodobnie będzie wpływać na ilość
+wytwarzanej energii pressure - ciśnienie  
+windspeed - prędkość wiatru  
+humidity - wilgotność  
+icon - ikona ?  
+dewpoint - temperatura punktu rosy  
+windbearing - łożysko wiatrowe ?  
+cloud cover - zachmurzenie  
+Nazwy kolumn tempi -&gt; cloudcoveri odpowiadają kolumnom
+temperatura\_ambiente -&gt; cloudcover, trudno stwierdzić w jaki sposób
+ich wartości są powiązane  
+dist - distance ?  
+altitude - wysokość  
+azimuth - azymut  
+altitudei -&gt; azimuthi - odpowiedniki włoskie altitude i azimuth -
+inne wartości  
+pcnm1 -&gt; pcnm15 - prawdopodobnie pomiary z jakichś czujników, mają
+tyle samo zer ile 'idsito' i 'idmodel' (wyjątkiem jest pcnm13) co może
+wskazywać że są powiązane z ogniwami fotowoltaicznymi - odpowiednim
+ogniwom odpowiadają powtarzające się wartości  
+irr\_pvgis\_mod - ?  
+irri\_pvgis\_mod - ?  
+kwh - wytworzone Kilowatogodziny (wartości znormalizowane)
+
+Na podstawie tego, że dla każdej godziny jest 17 pomiarów, można
+wywnioskować, że pomiary pochodzą właśnie z 17 jednostek
+fotowoltaicznych. Pierwsze kolumny opisują ogniwa ('idsito', 'idmodel',
+'idbrand', 'lat', 'lon', 'ageinmonths').
+
+Wartości zerowe  
+irradiamento - mogą być (noc)  
+pressure - nie powinno być, chyba, że kodowanie?
+
+#### 1. Poprawienie klas kolumn
 
 ``` r
 # to factor
@@ -312,11 +367,12 @@ power_stations_for_cor <- power_stations
 power_stations_for_cor$data <- as.numeric(as.POSIXlt(power_stations$data, format="%m/%d/%Y %H:%M"))
 ```
 
-#### 9. Uzupełnienie brakujących wartości
+#### 2. Uzupełnienie brakujących wartości
 
 ``` r
 # pressure
 power_stations$pressure <- ifelse(power_stations$pressure == 0, mean(power_stations$pressure), power_stations$pressure)
+power_stations$irradiamento <- ifelse(power_stations$irradiamento == 0 & power_stations$kwh != 0, mean(power_stations$irradiamento), power_stations$irradiamento)
 ```
 
 ### Korelacja zmiennych
@@ -434,67 +490,3 @@ defaultSummary(data.frame(pred = my_pred, obs = testing$kwh))
 
     ##       RMSE   Rsquared        MAE 
     ## 0.07329837 0.88047816 0.03887266
-
-### Opis kolumn - TODO: fix and move this section up
-
-Dane są z ogniw fotowoltaicznych umieszczonych we Włoszech, to tłumaczy
-dlaczego część kolumn w pliku z danymi ma włoskie nazwy.  
-Zbiór danych opisany jest przy użyciu 51 kolumn.  
-Wszystkie kolumny poza kolumnami 'id', 'data' oraz 'anno' mają wartości
-liczbowe i są znormalizowane.
-
-id - identyfikator  
-idsito - id miejsca  
-idmodel - id modelu  
-idbrand - id marki
-
-idsito, idmodel i idbrand są znormalizowanymi identyfikatorami miejsca
-modelu i marki  
-Jest 17 jednostek fotowoltaicznych z których są zebrane pomiary, każda z
-nich opisana jest marką i modelem oraz wiekiem w miesiącach idsito,
-idmodel, idbrand, lat, lon, ageinmonths - opisją ogniwa fotowoltaiczne.
-Wartości są znormalizowane
-
-lat - lattitude, szerokość geograficzna ogniwa fotowoltaicznego  
-lon - longitude, długość geograficzna ogniwa fotowoltaicznego  
-ageinmonths - wiek ogniwa fotowoltaicznego  
-anno - rok  
-day - dzien (przyjmuje 365 różnych wartości, więc wszystko się zgadza)  
-ora - teraz (0 dla godz. 2:00, rośnie do 1 dla godz 20:00 czyli końca
-pomiarów) data - data i czas w formacie MM/DD/YYYY HH:MM, od 1/2/2012
-2:00 do 12/31/2013 20:00  
-pomiary są zapisane od 2:00 do 20:00 - dlaczego? przecież latem słońce
-świeci dłużej  
-można uzyskać ilość energii wytworzonej w ciągu godziny poprzez
-grupowanie po dacie (suma wartości z kolumny kwh)  
-dlaczego jest 17 wpisów na jedną godzinę? "Każdy wiersz w zbiorze danych
-zawiera uśrednione informacje z jednej godziny pomiarów pojedynczej
-jednostki fotowoltaicznej" - dlatego, że jest w sumie 17 jednostek
-(idsito) temperatura\_ambiente - temperatura otoczenia, spodziewamy się,
-że to może wpływać na wytwarzaną ilość energii  
-irradiamento - promieniowanie, zera są możliwe - może być noc, ogniwo
-może być w cieniu  
-pressure - ciśnienie, tutaj nie powinno być wartości 0, uzupełnione
-będzie średnią  
-windspeed - prędkość wiatru, bardzo mało wartości zerowych, możliwe jest
-że nie było wiatru, zostawiamy wartości 0  
-humidity - wilgotność  
-icon - ikona ?  
-dewpoint - temperatura punktu rosy (znormalizowana)  
-windbearing - łożysko wiatrowe ?  
-cloud cover - zachmurzenie, może być zerowe, zostawiamy wartości 0  
-tempi -&gt; cloudcoveri - duplikacja kolumn temperatura\_ambiente -&gt;
-cloudcover tylko kolumny nazwane po włosku? - inne wartości, dodane 'i'
-na końcu - co oznacza ?  
-dist - distance ?  
-altitude - wysokość  
-azimuth - azymut  
-altitudei -&gt; azimuthi - odpowiedniki włoskie altitude i azimuth -
-inne wartości  
-pcnm1 -&gt; pcnm15 - jakieś pomiary z jakichś czujników, mają tyle samo
-zer ile idsito i idmodel (wyjątkiem jest pcnm13) co może wskazywać że są
-powiązane z czujnikami, odpowiednim ogniwom odpowiadają powtarzające się
-wartości  
-irr\_pvgis\_mod - ?  
-irri\_pvgis\_mod - ?  
-kwh - wytworzone Kilowatogodziny (wartości znormalizowane)
