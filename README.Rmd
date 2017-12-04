@@ -66,8 +66,8 @@ sapply(power_stations, function(x) sum(x==0))
 # change_to_factor <- c('idsito', 'idmodel', 'idbrand', 'anno', 'day')
 # power_stations[, change_to_factor] <- lapply(power_stations[, change_to_factor], as.factor)
 # to date
-power_stations <- power_stations %>% mutate(date_year_month=format(as.POSIXct(data, format='%m/%d/%Y %H:%M'), "%Y-%m"))
-power_stations$data <- as.numeric(as.POSIXlt(power_stations$data, format="%m/%d/%Y %H:%M"))
+power_stations_for_cor <- power_stations
+power_stations_for_cor$data <- as.numeric(as.POSIXlt(power_stations$data, format="%m/%d/%Y %H:%M"))
 ```
 9. Uzupełnienie brakujących wartości
 ```{r fix values}
@@ -77,7 +77,7 @@ power_stations$pressure <- ifelse(power_stations$pressure == 0, mean(power_stati
 
 ### Korelacja między zmiennymi
 ```{r fig.width=9, fig.height=9, cache=TRUE}
-correlations <- round(cor(power_stations), 2)
+correlations <- round(cor(power_stations_for_cor), 2)
 correlations[upper.tri(correlations)] <- NA
 correlations_melt <- melt(correlations, na.rm = TRUE)
 
@@ -112,6 +112,7 @@ ggplot(data = kwh_correlations, mapping = aes(x=rownames(kwh_correlations), y=va
 
 ### Wykres - zamiana energii w czasie i przestrzeni
 ```{r fig.width=9, fig.height=9, cache=TRUE}
+power_stations <- power_stations %>% mutate(date_year_month=format(as.POSIXct(data, format='%m/%d/%Y %H:%M'), "%Y-%m"))
 energy_sito_date <- power_stations %>% group_by(date_year_month, idsito) %>% summarise(sum_kwh=sum(kwh))
 ggplot(data = energy_sito_date, mapping = aes(x=date_year_month, y=sum_kwh, color=factor(idsito), group=factor(idsito))) + 
   geom_line() +
@@ -167,10 +168,6 @@ idmodel - id modelu
 idbrand - id marki  
 
 idsito, idmodel i idbrand są znormalizowanymi identyfikatorami miejsca modelu i marki  
-liczba różnych wartości jakie przyjmują:
-```{r}
-sapply(data[, names(data) %in% c('idsito', 'idmodel', 'idbrand')], function(x) length(unique(x)))
-```
 Jest 17 jednostek fotowoltaicznych z których są zebrane pomiary, każda z nich opisana jest marką i modelem oraz wiekiem w miesiącach
 idsito, idmodel, idbrand, lat, lon, ageinmonths - opisją ogniwa fotowoltaiczne. Wartości są znormalizowane 
 

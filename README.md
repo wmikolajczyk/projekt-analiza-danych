@@ -10,6 +10,8 @@ December 2, 2017
     -   [Wykres - zamiana energii w czasie i
         przestrzeni](#wykres---zamiana-energii-w-czasie-i-przestrzeni)
     -   [Regresor](#regresor)
+    -   [Opis kolumn - TODO: fix and move this section
+        up](#opis-kolumn---todo-fix-and-move-this-section-up)
 
 TODO: podsumowanie analizy
 --------------------------
@@ -306,8 +308,8 @@ sapply(power_stations, function(x) sum(x==0))
 # change_to_factor <- c('idsito', 'idmodel', 'idbrand', 'anno', 'day')
 # power_stations[, change_to_factor] <- lapply(power_stations[, change_to_factor], as.factor)
 # to date
-power_stations <- power_stations %>% mutate(date_year_month=format(as.POSIXct(data, format='%m/%d/%Y %H:%M'), "%Y-%m"))
-power_stations$data <- as.numeric(as.POSIXlt(power_stations$data, format="%m/%d/%Y %H:%M"))
+power_stations_for_cor <- power_stations
+power_stations_for_cor$data <- as.numeric(as.POSIXlt(power_stations$data, format="%m/%d/%Y %H:%M"))
 ```
 
 1.  Uzupełnienie brakujących wartości
@@ -320,7 +322,7 @@ power_stations$pressure <- ifelse(power_stations$pressure == 0, mean(power_stati
 ### Korelacja między zmiennymi
 
 ``` r
-correlations <- round(cor(power_stations), 2)
+correlations <- round(cor(power_stations_for_cor), 2)
 correlations[upper.tri(correlations)] <- NA
 correlations_melt <- melt(correlations, na.rm = TRUE)
 
@@ -333,7 +335,7 @@ ggplot(data = correlations_melt, aes(Var1, Var2, fill = value)) +
   coord_fixed()
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-4-1.png) Korelacja
+![](README_files/figure-markdown_github/unnamed-chunk-2-1.png) Korelacja
 między zmiennymi dla wartości bezwzględnej korelacji &gt; 0.5
 
 ``` r
@@ -347,7 +349,7 @@ ggplot(data = top_correlatinons, aes(Var1, Var2, fill = value)) +
   coord_fixed()
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-5-1.png) Wykres
+![](README_files/figure-markdown_github/unnamed-chunk-3-1.png) Wykres
 korelacji atrybutów do kwh
 
 ``` r
@@ -359,11 +361,12 @@ ggplot(data = kwh_correlations, mapping = aes(x=rownames(kwh_correlations), y=va
   theme_bw()
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-6-1.png)
+![](README_files/figure-markdown_github/unnamed-chunk-4-1.png)
 
 ### Wykres - zamiana energii w czasie i przestrzeni
 
 ``` r
+power_stations <- power_stations %>% mutate(date_year_month=format(as.POSIXct(data, format='%m/%d/%Y %H:%M'), "%Y-%m"))
 energy_sito_date <- power_stations %>% group_by(date_year_month, idsito) %>% summarise(sum_kwh=sum(kwh))
 ggplot(data = energy_sito_date, mapping = aes(x=date_year_month, y=sum_kwh, color=factor(idsito), group=factor(idsito))) + 
   geom_line() +
@@ -371,7 +374,7 @@ ggplot(data = energy_sito_date, mapping = aes(x=date_year_month, y=sum_kwh, colo
   theme(axis.text.x = element_text(angle = 70, size = 8, vjust = 1, hjust = 1))
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-7-1.png)
+![](README_files/figure-markdown_github/unnamed-chunk-5-1.png)
 
 ### Regresor
 
@@ -451,3 +454,67 @@ defaultSummary(data.frame(pred = my_pred, obs = testing$kwh))
 
     ##       RMSE   Rsquared        MAE 
     ## 0.09988106 0.77467375 0.05394532
+
+### Opis kolumn - TODO: fix and move this section up
+
+Dane są z ogniw fotowoltaicznych umieszczonych we Włoszech, to tłumaczy
+dlaczego część kolumn w pliku z danymi ma włoskie nazwy.  
+Zbiór danych opisany jest przy użyciu 51 kolumn.  
+Wszystkie kolumny poza kolumnami 'id', 'data' oraz 'anno' mają wartości
+liczbowe i są znormalizowane.
+
+id - identyfikator  
+idsito - id miejsca  
+idmodel - id modelu  
+idbrand - id marki
+
+idsito, idmodel i idbrand są znormalizowanymi identyfikatorami miejsca
+modelu i marki  
+Jest 17 jednostek fotowoltaicznych z których są zebrane pomiary, każda z
+nich opisana jest marką i modelem oraz wiekiem w miesiącach idsito,
+idmodel, idbrand, lat, lon, ageinmonths - opisją ogniwa fotowoltaiczne.
+Wartości są znormalizowane
+
+lat - lattitude, szerokość geograficzna ogniwa fotowoltaicznego  
+lon - longitude, długość geograficzna ogniwa fotowoltaicznego  
+ageinmonths - wiek ogniwa fotowoltaicznego  
+anno - rok  
+day - dzien (przyjmuje 365 różnych wartości, więc wszystko się zgadza)  
+ora - teraz (0 dla godz. 2:00, rośnie do 1 dla godz 20:00 czyli końca
+pomiarów) data - data i czas w formacie MM/DD/YYYY HH:MM, od 1/2/2012
+2:00 do 12/31/2013 20:00  
+pomiary są zapisane od 2:00 do 20:00 - dlaczego? przecież latem słońce
+świeci dłużej  
+można uzyskać ilość energii wytworzonej w ciągu godziny poprzez
+grupowanie po dacie (suma wartości z kolumny kwh)  
+dlaczego jest 17 wpisów na jedną godzinę? "Każdy wiersz w zbiorze danych
+zawiera uśrednione informacje z jednej godziny pomiarów pojedynczej
+jednostki fotowoltaicznej" - dlatego, że jest w sumie 17 jednostek
+(idsito) temperatura\_ambiente - temperatura otoczenia, spodziewamy się,
+że to może wpływać na wytwarzaną ilość energii  
+irradiamento - promieniowanie, zera są możliwe - może być noc, ogniwo
+może być w cieniu  
+pressure - ciśnienie, tutaj nie powinno być wartości 0, uzupełnione
+będzie średnią  
+windspeed - prędkość wiatru, bardzo mało wartości zerowych, możliwe jest
+że nie było wiatru, zostawiamy wartości 0  
+humidity - wilgotność  
+icon - ikona ?  
+dewpoint - temperatura punktu rosy (znormalizowana)  
+windbearing - łożysko wiatrowe ?  
+cloud cover - zachmurzenie, może być zerowe, zostawiamy wartości 0  
+tempi -&gt; cloudcoveri - duplikacja kolumn temperatura\_ambiente -&gt;
+cloudcover tylko kolumny nazwane po włosku? - inne wartości, dodane 'i'
+na końcu - co oznacza ?  
+dist - distance ?  
+altitude - wysokość  
+azimuth - azymut  
+altitudei -&gt; azimuthi - odpowiedniki włoskie altitude i azimuth -
+inne wartości  
+pcnm1 -&gt; pcnm15 - jakieś pomiary z jakichś czujników, mają tyle samo
+zer ile idsito i idmodel (wyjątkiem jest pcnm13) co może wskazywać że są
+powiązane z czujnikami, odpowiednim ogniwom odpowiadają powtarzające się
+wartości  
+irr\_pvgis\_mod - ?  
+irri\_pvgis\_mod - ?  
+kwh - wytworzone Kilowatogodziny (wartości znormalizowane)
