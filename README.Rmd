@@ -238,5 +238,5 @@ my_pred <- predict(my_model, newdata = testing)
 defaultSummary(data.frame(pred = my_pred, obs = testing$kwh))
 ```
 
-Jako model wybrano Random Forest. Do utworzenia regresora zostały wykorzystane mocno skorelowane atrybuty z atrybutem wynikowym 'kwh'. Strojenie parametrów modelu odbyło się w oparciu o walidacyjny zbiór danych. Celem strojenia było uzyskanie jak najmniejszej wartości RMSE.
+Jako model wybrano Random Forest. Do utworzenia regresora zostały wykorzystane mocno skorelowane atrybuty z atrybutem wynikowym 'kwh'. Najbardziej skorelowanym atrybutem jest 'irradiamento' (promieniowanie). Strojenie parametrów modelu odbyło się w oparciu o walidacyjny zbiór danych. Celem strojenia było uzyskanie jak najmniejszej wartości RMSE.
 
