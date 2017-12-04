@@ -17,6 +17,10 @@ library(ggplot2)
 library(reshape2)
 library(caret)
 ```
+dplyr - do przetwarzania dataframe  
+ggplot2 - wykresy  
+reshape2 - funkcja melt  
+caret - regresor  
 
 #### Wczytanie danych z pliku .csv
 ```{r load data, cache=TRUE}
@@ -30,22 +34,37 @@ dimensions <- dim(power_stations)
 names(dimensions) <- c('l. wierszy', 'l. kolumn')
 dimensions
 ```
+Zbiór danych opisany jest 51 atrybutami i składa się z 235790 wierszy  
+
 #### 2. Podstawowe statystyki  
 ```{r short datasummary}
 summary(power_stations)
 ```
+Prawie wszystkie wartości są wartościami liczbowymi, znormalizowanymi  
+
 #### 3. Sprawdzenie czy zbiór zawiera wartości NA  
 ```{r check NA}
 any(is.na(power_stations))
 ```
+Zbiór nie zawiera wartości NA, zatem nie będzie konieczne zwracanie na ich wystąpienie uwagi przy przetwarzaniu  
+
 #### 4. Typy kolumn  
 ```{r column types}
 sapply(power_stations, class)
 ```
+Prawie wszystkie typy wartości określone są jako 'numeric'. W przypadku 'data' przydałaby się zamiana typu. Część wartości zakwalifikowanych jako 'numeric' tak naprawdę jest typu 'factor' (np. idmodel - określający model ogniwa)  
+
 #### 5. Liczba różnych wartości w kolumnach  
-```{r unique values in columns}
+```{r unique values in columns, fig.width=9, fig.height=9}
 sapply(power_stations, function(x) length(unique(x)))
+ggplot(melt(lapply(power_stations[, !(names(power_stations) %in% c('id', 'data'))], function(x) length(unique(x)))), aes(x=L1, y=value)) + 
+  geom_bar(stat = "identity") +
+  labs(title = "Liczba różnych wartości", x = "Atrybut", y = "Liczba wartości") + 
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 70, size = 8, vjust = 1, hjust = 1))
 ```
+
+
 #### 6. Rozkład wartości poszczególnych atrybutów  
 ```{r fig.width=9, fig.height=18, cache=TRUE}
 ggplot(data = melt(power_stations), mapping = aes(x = value)) + 
@@ -103,6 +122,7 @@ Wartości zerowe
 irradiamento - mogą być (noc)  
 pressure - nie powinno być, chyba, że kodowanie? 
 
+### Przygotowanie danych
 #### 1. Poprawienie klas kolumn
 ```{r fix column types}
 # to factor

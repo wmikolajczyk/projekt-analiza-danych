@@ -7,6 +7,7 @@ December 2, 2017
 -   [Wykorzystane biblioteki](#wykorzystane-biblioteki)
 -   [Podsumowanie danych w zbiorze](#podsumowanie-danych-w-zbiorze)
 -   [Opis danych](#opis-danych)
+-   [Przygotowanie danych](#przygotowanie-danych)
 -   [Korelacja zmiennych](#korelacja-zmiennych)
 -   [Wykres - zmiana wytwarzanej energii przez ogniwa w czasie i
     przestrzeni](#wykres---zmiana-wytwarzanej-energii-przez-ogniwa-w-czasie-i-przestrzeni)
@@ -22,6 +23,11 @@ library(ggplot2)
 library(reshape2)
 library(caret)
 ```
+
+dplyr - do przetwarzania dataframe  
+ggplot2 - wykresy  
+reshape2 - funkcja melt  
+caret - regresor
 
 #### Wczytanie danych z pliku .csv
 
@@ -41,6 +47,8 @@ dimensions
 
     ## l. wierszy  l. kolumn 
     ##     235790         51
+
+Zbiór danych opisany jest 51 atrybutami i składa się z 235790 wierszy
 
 #### 2. Podstawowe statystyki
 
@@ -153,6 +161,8 @@ summary(power_stations)
     ##  Max.   :1.0000   Max.   :1.0000   Max.   : 1.0060   Max.   :1.0000  
     ## 
 
+Prawie wszystkie wartości są wartościami liczbowymi, znormalizowanymi
+
 #### 3. Sprawdzenie czy zbiór zawiera wartości NA
 
 ``` r
@@ -160,6 +170,9 @@ any(is.na(power_stations))
 ```
 
     ## [1] FALSE
+
+Zbiór nie zawiera wartości NA, zatem nie będzie konieczne zwracanie na
+ich wystąpienie uwagi przy przetwarzaniu
 
 #### 4. Typy kolumn
 
@@ -202,6 +215,11 @@ sapply(power_stations, class)
     ##        irr_pvgis_mod       irri_pvgis_mod                  kwh 
     ##            "numeric"            "numeric"            "numeric"
 
+Prawie wszystkie typy wartości określone są jako 'numeric'. W przypadku
+'data' przydałaby się zamiana typu. Część wartości zakwalifikowanych
+jako 'numeric' tak naprawdę jest typu 'factor' (np. idmodel -
+określający model ogniwa)
+
 #### 5. Liczba różnych wartości w kolumnach
 
 ``` r
@@ -242,6 +260,16 @@ sapply(power_stations, function(x) length(unique(x)))
     ##                   13                   13                   11 
     ##        irr_pvgis_mod       irri_pvgis_mod                  kwh 
     ##                  870                  752                  864
+
+``` r
+ggplot(melt(lapply(power_stations[, !(names(power_stations) %in% c('id', 'data'))], function(x) length(unique(x)))), aes(x=L1, y=value)) + 
+  geom_bar(stat = "identity") +
+  labs(title = "Liczba różnych wartości", x = "Atrybut", y = "Liczba wartości") + 
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 70, size = 8, vjust = 1, hjust = 1))
+```
+
+![](README_files/figure-markdown_github/unique%20values%20in%20columns-1.png)
 
 #### 6. Rozkład wartości poszczególnych atrybutów
 
@@ -354,6 +382,8 @@ fotowoltaicznych. Pierwsze kolumny opisują ogniwa ('idsito', 'idmodel',
 Wartości zerowe  
 irradiamento - mogą być (noc)  
 pressure - nie powinno być, chyba, że kodowanie?
+
+### Przygotowanie danych
 
 #### 1. Poprawienie klas kolumn
 
