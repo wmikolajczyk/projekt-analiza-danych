@@ -8,11 +8,7 @@ output:
     hard_line_breaks: false
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
-### TODO: rozdział podsumowujący analizę
+## TODO: podsumowanie analizy
 
 ### Wykorzystane biblioteki
 ```{r load libraries, message=FALSE}
@@ -22,57 +18,145 @@ library(reshape2)
 library(caret)
 ```
 
-### Wczytanie danych z pliku
+#### Wczytanie danych z pliku .csv
 ```{r load data, cache=TRUE}
-data <- read.csv('elektrownie.csv')
+power_stations <- read.csv('elektrownie.csv')
 ```
 
-### Krótkie podsumowanie danych w zbiorze
-
-##### Sprawdzenie czy zbiór danych zawiera wartości NA
-```{r}
-any(is.na(data))
+### Podsumowanie danych w zbiorze
+1. Rozmiar zbioru danych  
+```{r dimensions}
+dimensions <- dim(power_stations)
+names(dimensions) <- c('l. wierszy', 'l. kolumn')
+dimensions
 ```
-
-Liczba wartości zerowych w kolumnach
-```{r}
-sapply(data, function(x) sum(x==0))
-```
-
-##### Podstawowe statystyki
+2. Podstawowe statystyki  
 ```{r short datasummary}
-summary(data)
+summary(power_stations)
 ```
-##### Liczba wierszy danych
-```{r}
-nrow(data)
+3. Sprawdzenie czy zbiór zawiera wartości NA  
+```{r check NA}
+any(is.na(power_stations))
 ```
-
-##### Liczba kolumn
-```{r}
-ncol(data)
+4. Typy kolumn  
+```{r column types}
+sapply(power_stations, class)
 ```
-##### Typy kolumn
-```{r}
-pander::pander(sapply(data, class))
+5. Liczba różnych wartości w kolumnach
+```{r unique values in columns}
+sapply(power_stations, function(x) length(unique(x)))
 ```
-
-##### Liczba różnych wartości kolumn
-```{r}
-pander::pander(sapply(data, function(x) length(unique(x))))
-```
-
-##### Rozkład wartości poszczególnych atrybutów
+6. Rozkład wartości poszczególnych atrybutów
 ```{r fig.width=9, fig.height=18, cache=TRUE}
-ggplot(data = melt(data), mapping = aes(x = value)) + 
+ggplot(data = melt(power_stations), mapping = aes(x = value)) + 
   geom_histogram(bins=50) + 
   labs(title = "Rozkład wartości atrybutów") + 
   facet_wrap(~variable, ncol=4, scales = 'free_x') + 
   scale_x_continuous(labels = scales::comma) + 
   theme_bw()
 ```
+7. Liczba wartości 0 w kolumnach  
+```{r count zeros}
+sapply(power_stations, function(x) sum(x==0))
+```
+8. Poprawienie klas kolumn
+```{r fix column types}
+# to factor
+# correlations doesn't work with not numeric
+# change_to_factor <- c('idsito', 'idmodel', 'idbrand', 'anno', 'day')
+# power_stations[, change_to_factor] <- lapply(power_stations[, change_to_factor], as.factor)
+# to date
+power_stations <- power_stations %>% mutate(date_year_month=format(as.POSIXct(data, format='%m/%d/%Y %H:%M'), "%Y-%m"))
+power_stations$data <- as.numeric(as.POSIXlt(power_stations$data, format="%m/%d/%Y %H:%M"))
+```
+9. Uzupełnienie brakujących wartości
+```{r fix values}
+# pressure
+power_stations$pressure <- ifelse(power_stations$pressure == 0, mean(power_stations$pressure), power_stations$pressure)
+```
 
-### Opis kolumn
+### Korelacja między zmiennymi
+```{r fig.width=9, fig.height=9, cache=TRUE}
+correlations <- round(cor(power_stations), 2)
+correlations[upper.tri(correlations)] <- NA
+correlations_melt <- melt(correlations, na.rm = TRUE)
+
+ggplot(data = correlations_melt, aes(Var1, Var2, fill = value)) + 
+  geom_tile(color = "white") + 
+  labs(title = "Korelacja atrybutów", x = "Atrybuty", y = "Wartość korelacji") + 
+  scale_fill_gradient2(low="blue", mid="white", high="red", midpoint=0, limit=c(-1,1)) + 
+  theme_minimal() + 
+  theme(axis.text.x = element_text(angle = 70, size = 8, vjust = 1, hjust = 1)) +
+  coord_fixed()
+```
+Korelacja między zmiennymi dla wartości bezwzględnej korelacji > 0.5
+```{r fig.width=9, fig.height=9, cache=TRUE}
+top_correlatinons <- correlations_melt %>% filter(abs(value) > 0.5, Var1 != Var2)
+ggplot(data = top_correlatinons, aes(Var1, Var2, fill = value)) + 
+  geom_tile(color = "white") + 
+  labs(title = "Korelacja atrybutów powyżej progu korelacji", x = "Atrybuty", y = "Wartość korelacji") + 
+  scale_fill_gradient2(low="blue", mid="white", high="red", midpoint=0, limit=c(-1,1)) + 
+  theme_minimal() + 
+  theme(axis.text.x = element_text(angle = 70, size = 8, vjust = 1, hjust = 1)) +
+  coord_fixed()
+```
+Wykres korelacji atrybutów do kwh
+```{r fig.width=9, fig.height=9, cache=TRUE}
+kwh_correlations <- melt(correlations['kwh', ])
+ggplot(data = kwh_correlations, mapping = aes(x=rownames(kwh_correlations), y=value)) + 
+  geom_bar(stat="identity") + 
+  labs(title = "Korelacja do atrybutu kwh", x = "Atrybuty", y = "Wartość korelacji") + 
+  coord_flip() + 
+  theme_bw()
+```
+
+### Wykres - zamiana energii w czasie i przestrzeni
+```{r fig.width=9, fig.height=9, cache=TRUE}
+energy_sito_date <- power_stations %>% group_by(date_year_month, idsito) %>% summarise(sum_kwh=sum(kwh))
+ggplot(data = energy_sito_date, mapping = aes(x=date_year_month, y=sum_kwh, color=factor(idsito), group=factor(idsito))) + 
+  geom_line() +
+  labs(title = "Wykres energii w czasie dla ogniw", x = "Data", y = "Suma wytworzonej energii[kwh]") +
+  theme(axis.text.x = element_text(angle = 70, size = 8, vjust = 1, hjust = 1))
+```
+
+### Regresor
+```{r regressor, cache=TRUE}
+power_stations_sample <- power_stations %>% select(idsito, irradiamento, kwh)
+set.seed(93)
+inTraining <- 
+    createDataPartition(
+        # atrybut do stratyfikacji
+        y = power_stations_sample$idsito,
+        # procent w zbiorze uczącym
+        p = .75,
+        # chcemy indeksy a nie listę
+        list = FALSE)
+
+training <- power_stations_sample[ inTraining,]
+testing  <- power_stations_sample[-inTraining,]
+
+ctrl <- trainControl(
+    # powtórzona ocena krzyżowa
+    method = "repeatedcv",
+    # liczba podziałów
+    number = 2,
+    # liczba powtórzeń
+    repeats = 2)
+
+set.seed(93)
+fit <- train(kwh ~ .,
+             data = training,
+             method = "rf",
+             trControl = ctrl,
+             # Paramter dla algorytmu uczącego
+             ntree = 10)
+fit
+my_pred <- predict(fit, newdata = testing)
+
+defaultSummary(data.frame(pred = my_pred, obs = testing$kwh))
+```
+
+### Opis kolumn - TODO: fix and move this section up
 Dane są z ogniw fotowoltaicznych umieszczonych we Włoszech, to tłumaczy dlaczego część kolumn w pliku z danymi ma włoskie nazwy.  
 Zbiór danych opisany jest przy użyciu 51 kolumn.  
 Wszystkie kolumny poza kolumnami 'id', 'data' oraz 'anno' mają wartości liczbowe i są znormalizowane.  
@@ -118,105 +202,3 @@ pcnm1 -> pcnm15 - jakieś pomiary z jakichś czujników, mają tyle samo zer ile
 irr_pvgis_mod - ?  
 irri_pvgis_mod - ?  
 kwh - wytworzone Kilowatogodziny (wartości znormalizowane)  
-
-### Brakujące wartości - ciągi 0 w różnych kolumnach, tylko pressure
-```{r}
-data$pressure <- ifelse(data$pressure == 0, mean(data$pressure), data$pressure)
-```
-
-##### Przetworzenie daty na wartość liczbową
-```{r}
-data2 <- data
-data2$data <- as.numeric(as.POSIXct(data2$data, format="%m/%d/%Y %H:%M"))
-```
-
-### Korelacja między zmiennymi
-Odfiltrowanie daty, aby zostały same numeryczne wartości  
-Macierz korelacji jest symetryczna, więc dla czytelności usuwamy górny trójkąt
-```{r fig.width=9, fig.height=9, cache=TRUE}
-correlations <- round(cor(data2), 2)
-correlations[upper.tri(correlations)] <- NA
-correlations_melt <- melt(correlations, na.rm = TRUE)
-
-ggplot(data = correlations_melt, aes(Var1, Var2, fill = value)) + 
-  geom_tile(color = "white") + 
-  labs(title = "Korelacja atrybutów", x = "Atrybuty", y = "Wartość korelacji") + 
-  scale_fill_gradient2(low="blue", mid="white", high="red", midpoint=0, limit=c(-1,1)) + 
-  theme_minimal() + 
-  theme(axis.text.x = element_text(angle = 70, size = 8, vjust = 1, hjust = 1)) +
-  coord_fixed()
-```
-
-##### Kolejny wykres korelacji - tym razem tylko dla skorelowanych dodanio / ujmenie powyżej pewnego progu
-```{r fig.width=9, fig.height=9, cache=TRUE}
-top_correlatinons <- correlations_melt %>% filter(abs(value) > 0.3, Var1 != Var2)
-ggplot(data = top_correlatinons, aes(Var1, Var2, fill = value)) + 
-  geom_tile(color = "white") + 
-  labs(title = "Korelacja atrybutów powyżej progu korelacji", x = "Atrybuty", y = "Wartość korelacji") + 
-  scale_fill_gradient2(low="blue", mid="white", high="red", midpoint=0, limit=c(-1,1)) + 
-  theme_minimal() + 
-  theme(axis.text.x = element_text(angle = 70, size = 8, vjust = 1, hjust = 1)) +
-  coord_fixed()
-```
-
-##### Kolejny wykres korelacji - korelacja atrybutów do kwh
-```{r fig.width=9, fig.height=9, cache=TRUE}
-kwh_correlations <- melt(correlations['kwh', ])
-ggplot(data = kwh_correlations, mapping = aes(x=rownames(kwh_correlations), y=value)) + 
-  geom_bar(stat="identity") + 
-  labs(title = "Korelacja do atrybutu kwh", x = "Atrybuty", y = "Wartość korelacji") + 
-  coord_flip() + 
-  theme_bw()
-```
-
-##### Wykres - zamiana energii w czasie i przestrzeni
-Zmiana daty na rok-miesiac
-```{r fig.width=9, fig.height=9, cache=TRUE}
-data <- data %>% 
-  rename(date=data) %>% 
-  mutate(date_year_month=format(as.POSIXct(date, format='%m/%d/%Y %H:%M'), "%Y-%m"))
-
-data2 <- data %>% group_by(date_year_month, idsito) %>% summarise(sum_kwh=sum(kwh))
-ggplot(data = data2, mapping = aes(x=date_year_month, y=sum_kwh, color=factor(idsito), group=factor(idsito))) + 
-  geom_line() +
-  labs(title = "Wykres energii w czasie dla ogniw", x = "Data", y = "Suma wytworzonej energii[kwh]") +
-  theme(axis.text.x = element_text(angle = 70, size = 8, vjust = 1, hjust = 1))
-```
-
-
-#### Regresor
-```{r}
-data3 <- sample_n(data %>% select(idsito, irradiamento, kwh), 100)
-set.seed(23)
-inTraining <- 
-    createDataPartition(
-        # atrybut do stratyfikacji
-        y = data3$idsito,
-        # procent w zbiorze uczącym
-        p = .75,
-        # chcemy indeksy a nie listę
-        list = FALSE)
-
-training <- data3[ inTraining,]
-testing  <- data3[-inTraining,]
-
-ctrl <- trainControl(
-    # powtórzona ocena krzyżowa
-    method = "repeatedcv",
-    # liczba podziałów
-    number = 2,
-    # liczba powtórzeń
-    repeats = 2)
-
-set.seed(23)
-fit <- train(kwh ~ .,
-             data = training,
-             method = "rf",
-             trControl = ctrl,
-             # Paramter dla algorytmu uczącego
-             ntree = 10)
-fit
-my_pred <- predict(fit, newdata = testing)
-
-defaultSummary(data.frame(pred = my_pred, obs = testing$kwh))
-```

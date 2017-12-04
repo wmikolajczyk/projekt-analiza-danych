@@ -3,18 +3,16 @@ Projekt analiza danych
 Wojciech Mikołajczyk
 December 2, 2017
 
--   [TODO: rozdział podsumowujący
-    analizę](#todo-rozdział-podsumowujący-analizę)
--   [Wykorzystane biblioteki](#wykorzystane-biblioteki)
--   [Wczytanie danych z pliku](#wczytanie-danych-z-pliku)
--   [Krótkie podsumowanie danych w
-    zbiorze](#krótkie-podsumowanie-danych-w-zbiorze)
--   [Opis kolumn](#opis-kolumn)
--   [Brakujące wartości - ciągi 0 w różnych kolumnach, tylko
-    pressure](#brakujące-wartości---ciągi-0-w-różnych-kolumnach-tylko-pressure)
--   [Korelacja między zmiennymi](#korelacja-między-zmiennymi)
+-   [TODO: podsumowanie analizy](#todo-podsumowanie-analizy)
+    -   [Wykorzystane biblioteki](#wykorzystane-biblioteki)
+    -   [Podsumowanie danych w zbiorze](#podsumowanie-danych-w-zbiorze)
+    -   [Korelacja między zmiennymi](#korelacja-między-zmiennymi)
+    -   [Wykres - zamiana energii w czasie i
+        przestrzeni](#wykres---zamiana-energii-w-czasie-i-przestrzeni)
+    -   [Regresor](#regresor)
 
-### TODO: rozdział podsumowujący analizę
+TODO: podsumowanie analizy
+--------------------------
 
 ### Wykorzystane biblioteki
 
@@ -25,67 +23,29 @@ library(reshape2)
 library(caret)
 ```
 
-### Wczytanie danych z pliku
+#### Wczytanie danych z pliku .csv
 
 ``` r
-data <- read.csv('elektrownie.csv')
+power_stations <- read.csv('elektrownie.csv')
 ```
 
-### Krótkie podsumowanie danych w zbiorze
+### Podsumowanie danych w zbiorze
 
-##### Sprawdzenie czy zbiór danych zawiera wartości NA
+1.  Rozmiar zbioru danych
 
 ``` r
-any(is.na(data))
+dimensions <- dim(power_stations)
+names(dimensions) <- c('l. wierszy', 'l. kolumn')
+dimensions
 ```
 
-    ## [1] FALSE
+    ## l. wierszy  l. kolumn 
+    ##     235790         51
 
-Liczba wartości zerowych w kolumnach
-
-``` r
-sapply(data, function(x) sum(x==0))
-```
-
-    ##                   id               idsito              idmodel 
-    ##                    0                13870                13870 
-    ##              idbrand                  lat                  lon 
-    ##                41610                    0                    0 
-    ##          ageinmonths                 anno                  day 
-    ##                69350                    0                  304 
-    ##                  ora                 data temperatura_ambiente 
-    ##                12410                    0                    0 
-    ##         irradiamento             pressure            windspeed 
-    ##                78489                32148                 1070 
-    ##             humidity                 icon             dewpoint 
-    ##                    0                45617                    0 
-    ##          windbearing           cloudcover                tempi 
-    ##                 2520                38394                    0 
-    ##                 irri            pressurei           windspeedi 
-    ##                    0               233263                    2 
-    ##            humidityi            dewpointi         windbearingi 
-    ##                    0                    0                    1 
-    ##          cloudcoveri                 dist             altitude 
-    ##                    1                  570                    0 
-    ##              azimuth            altitudei             azimuthi 
-    ##                    0                    1                    1 
-    ##                pcnm1                pcnm2                pcnm3 
-    ##                13870                13870                13870 
-    ##                pcnm4                pcnm5                pcnm6 
-    ##                13870                13870                13870 
-    ##                pcnm7                pcnm8                pcnm9 
-    ##                13870                13870                13870 
-    ##               pcnm10               pcnm11               pcnm12 
-    ##                13870                13870                13870 
-    ##               pcnm13               pcnm14               pcnm15 
-    ##                    0                13870                13870 
-    ##        irr_pvgis_mod       irri_pvgis_mod                  kwh 
-    ##                94008                    2                78521
-
-##### Podstawowe statystyki
+1.  Podstawowe statystyki
 
 ``` r
-summary(data)
+summary(power_stations)
 ```
 
     ##        id             idsito          idmodel          idbrand      
@@ -193,552 +153,100 @@ summary(data)
     ##  Max.   :1.0000   Max.   :1.0000   Max.   : 1.0060   Max.   :1.0000  
     ## 
 
-##### Liczba wierszy danych
+1.  Sprawdzenie czy zbiór zawiera wartości NA
 
 ``` r
-nrow(data)
+any(is.na(power_stations))
 ```
 
-    ## [1] 235790
+    ## [1] FALSE
 
-##### Liczba kolumn
+1.  Typy kolumn
 
 ``` r
-ncol(data)
+sapply(power_stations, class)
 ```
 
-    ## [1] 51
+    ##                   id               idsito              idmodel 
+    ##            "integer"            "numeric"            "numeric" 
+    ##              idbrand                  lat                  lon 
+    ##            "numeric"            "numeric"            "numeric" 
+    ##          ageinmonths                 anno                  day 
+    ##            "numeric"            "integer"            "numeric" 
+    ##                  ora                 data temperatura_ambiente 
+    ##            "numeric"             "factor"            "numeric" 
+    ##         irradiamento             pressure            windspeed 
+    ##            "numeric"            "numeric"            "numeric" 
+    ##             humidity                 icon             dewpoint 
+    ##            "numeric"            "numeric"            "numeric" 
+    ##          windbearing           cloudcover                tempi 
+    ##            "numeric"            "numeric"            "numeric" 
+    ##                 irri            pressurei           windspeedi 
+    ##            "numeric"            "numeric"            "numeric" 
+    ##            humidityi            dewpointi         windbearingi 
+    ##            "numeric"            "numeric"            "numeric" 
+    ##          cloudcoveri                 dist             altitude 
+    ##            "numeric"            "numeric"            "numeric" 
+    ##              azimuth            altitudei             azimuthi 
+    ##            "numeric"            "numeric"            "numeric" 
+    ##                pcnm1                pcnm2                pcnm3 
+    ##            "numeric"            "numeric"            "numeric" 
+    ##                pcnm4                pcnm5                pcnm6 
+    ##            "numeric"            "numeric"            "numeric" 
+    ##                pcnm7                pcnm8                pcnm9 
+    ##            "numeric"            "numeric"            "numeric" 
+    ##               pcnm10               pcnm11               pcnm12 
+    ##            "numeric"            "numeric"            "numeric" 
+    ##               pcnm13               pcnm14               pcnm15 
+    ##            "numeric"            "numeric"            "numeric" 
+    ##        irr_pvgis_mod       irri_pvgis_mod                  kwh 
+    ##            "numeric"            "numeric"            "numeric"
 
-##### Typy kolumn
+1.  Liczba różnych wartości w kolumnach
 
 ``` r
-pander::pander(sapply(data, class))
+sapply(power_stations, function(x) length(unique(x)))
 ```
 
-<table>
-<caption>Table continues below</caption>
-<colgroup>
-<col width="13%" />
-<col width="13%" />
-<col width="13%" />
-<col width="13%" />
-<col width="13%" />
-<col width="13%" />
-<col width="17%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th align="center">id</th>
-<th align="center">idsito</th>
-<th align="center">idmodel</th>
-<th align="center">idbrand</th>
-<th align="center">lat</th>
-<th align="center">lon</th>
-<th align="center">ageinmonths</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="center">integer</td>
-<td align="center">numeric</td>
-<td align="center">numeric</td>
-<td align="center">numeric</td>
-<td align="center">numeric</td>
-<td align="center">numeric</td>
-<td align="center">numeric</td>
-</tr>
-</tbody>
-</table>
+    ##                   id               idsito              idmodel 
+    ##               235790                   17                   11 
+    ##              idbrand                  lat                  lon 
+    ##                    6                    9                   12 
+    ##          ageinmonths                 anno                  day 
+    ##                    7                    2                  365 
+    ##                  ora                 data temperatura_ambiente 
+    ##                   19                13870                   52 
+    ##         irradiamento             pressure            windspeed 
+    ##                  639                   41                  367 
+    ##             humidity                 icon             dewpoint 
+    ##                   85                    7                  634 
+    ##          windbearing           cloudcover                tempi 
+    ##                  360                  101                  522 
+    ##                 irri            pressurei           windspeedi 
+    ##                  236                   47                  126 
+    ##            humidityi            dewpointi         windbearingi 
+    ##                  409                  183                  514 
+    ##          cloudcoveri                 dist             altitude 
+    ##                  393                  184                  773 
+    ##              azimuth            altitudei             azimuthi 
+    ##                  689                  935                  937 
+    ##                pcnm1                pcnm2                pcnm3 
+    ##                   11                   16                   13 
+    ##                pcnm4                pcnm5                pcnm6 
+    ##                   13                   13                   12 
+    ##                pcnm7                pcnm8                pcnm9 
+    ##                   13                   13                   13 
+    ##               pcnm10               pcnm11               pcnm12 
+    ##                   13                   13                   13 
+    ##               pcnm13               pcnm14               pcnm15 
+    ##                   13                   13                   11 
+    ##        irr_pvgis_mod       irri_pvgis_mod                  kwh 
+    ##                  870                  752                  864
 
-<table>
-<caption>Table continues below</caption>
-<colgroup>
-<col width="13%" />
-<col width="13%" />
-<col width="13%" />
-<col width="11%" />
-<col width="30%" />
-<col width="18%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th align="center">anno</th>
-<th align="center">day</th>
-<th align="center">ora</th>
-<th align="center">data</th>
-<th align="center">temperatura_ambiente</th>
-<th align="center">irradiamento</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="center">integer</td>
-<td align="center">numeric</td>
-<td align="center">numeric</td>
-<td align="center">factor</td>
-<td align="center">numeric</td>
-<td align="center">numeric</td>
-</tr>
-</tbody>
-</table>
-
-<table style="width:94%;">
-<caption>Table continues below</caption>
-<colgroup>
-<col width="15%" />
-<col width="16%" />
-<col width="15%" />
-<col width="13%" />
-<col width="15%" />
-<col width="18%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th align="center">pressure</th>
-<th align="center">windspeed</th>
-<th align="center">humidity</th>
-<th align="center">icon</th>
-<th align="center">dewpoint</th>
-<th align="center">windbearing</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="center">numeric</td>
-<td align="center">numeric</td>
-<td align="center">numeric</td>
-<td align="center">numeric</td>
-<td align="center">numeric</td>
-<td align="center">numeric</td>
-</tr>
-</tbody>
-</table>
-
-<table style="width:99%;">
-<caption>Table continues below</caption>
-<colgroup>
-<col width="18%" />
-<col width="13%" />
-<col width="13%" />
-<col width="16%" />
-<col width="18%" />
-<col width="18%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th align="center">cloudcover</th>
-<th align="center">tempi</th>
-<th align="center">irri</th>
-<th align="center">pressurei</th>
-<th align="center">windspeedi</th>
-<th align="center">humidityi</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="center">numeric</td>
-<td align="center">numeric</td>
-<td align="center">numeric</td>
-<td align="center">numeric</td>
-<td align="center">numeric</td>
-<td align="center">numeric</td>
-</tr>
-</tbody>
-</table>
-
-<table>
-<caption>Table continues below</caption>
-<colgroup>
-<col width="16%" />
-<col width="20%" />
-<col width="19%" />
-<col width="13%" />
-<col width="15%" />
-<col width="15%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th align="center">dewpointi</th>
-<th align="center">windbearingi</th>
-<th align="center">cloudcoveri</th>
-<th align="center">dist</th>
-<th align="center">altitude</th>
-<th align="center">azimuth</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="center">numeric</td>
-<td align="center">numeric</td>
-<td align="center">numeric</td>
-<td align="center">numeric</td>
-<td align="center">numeric</td>
-<td align="center">numeric</td>
-</tr>
-</tbody>
-</table>
-
-<table style="width:100%;">
-<caption>Table continues below</caption>
-<colgroup>
-<col width="16%" />
-<col width="15%" />
-<col width="13%" />
-<col width="13%" />
-<col width="13%" />
-<col width="13%" />
-<col width="13%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th align="center">altitudei</th>
-<th align="center">azimuthi</th>
-<th align="center">pcnm1</th>
-<th align="center">pcnm2</th>
-<th align="center">pcnm3</th>
-<th align="center">pcnm4</th>
-<th align="center">pcnm5</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="center">numeric</td>
-<td align="center">numeric</td>
-<td align="center">numeric</td>
-<td align="center">numeric</td>
-<td align="center">numeric</td>
-<td align="center">numeric</td>
-<td align="center">numeric</td>
-</tr>
-</tbody>
-</table>
-
-<table>
-<caption>Table continues below</caption>
-<colgroup>
-<col width="12%" />
-<col width="12%" />
-<col width="12%" />
-<col width="12%" />
-<col width="12%" />
-<col width="12%" />
-<col width="12%" />
-<col width="12%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th align="center">pcnm6</th>
-<th align="center">pcnm7</th>
-<th align="center">pcnm8</th>
-<th align="center">pcnm9</th>
-<th align="center">pcnm10</th>
-<th align="center">pcnm11</th>
-<th align="center">pcnm12</th>
-<th align="center">pcnm13</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="center">numeric</td>
-<td align="center">numeric</td>
-<td align="center">numeric</td>
-<td align="center">numeric</td>
-<td align="center">numeric</td>
-<td align="center">numeric</td>
-<td align="center">numeric</td>
-<td align="center">numeric</td>
-</tr>
-</tbody>
-</table>
-
-<table style="width:86%;">
-<colgroup>
-<col width="13%" />
-<col width="13%" />
-<col width="22%" />
-<col width="23%" />
-<col width="12%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th align="center">pcnm14</th>
-<th align="center">pcnm15</th>
-<th align="center">irr_pvgis_mod</th>
-<th align="center">irri_pvgis_mod</th>
-<th align="center">kwh</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="center">numeric</td>
-<td align="center">numeric</td>
-<td align="center">numeric</td>
-<td align="center">numeric</td>
-<td align="center">numeric</td>
-</tr>
-</tbody>
-</table>
-
-##### Liczba różnych wartości kolumn
+1.  Rozkład wartości poszczególnych atrybutów
 
 ``` r
-pander::pander(sapply(data, function(x) length(unique(x))))
-```
-
-<table>
-<caption>Table continues below</caption>
-<colgroup>
-<col width="11%" />
-<col width="11%" />
-<col width="12%" />
-<col width="12%" />
-<col width="7%" />
-<col width="7%" />
-<col width="17%" />
-<col width="8%" />
-<col width="8%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th align="center">id</th>
-<th align="center">idsito</th>
-<th align="center">idmodel</th>
-<th align="center">idbrand</th>
-<th align="center">lat</th>
-<th align="center">lon</th>
-<th align="center">ageinmonths</th>
-<th align="center">anno</th>
-<th align="center">day</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="center">235790</td>
-<td align="center">17</td>
-<td align="center">11</td>
-<td align="center">6</td>
-<td align="center">9</td>
-<td align="center">12</td>
-<td align="center">7</td>
-<td align="center">2</td>
-<td align="center">365</td>
-</tr>
-</tbody>
-</table>
-
-<table>
-<caption>Table continues below</caption>
-<colgroup>
-<col width="8%" />
-<col width="10%" />
-<col width="31%" />
-<col width="20%" />
-<col width="14%" />
-<col width="14%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th align="center">ora</th>
-<th align="center">data</th>
-<th align="center">temperatura_ambiente</th>
-<th align="center">irradiamento</th>
-<th align="center">pressure</th>
-<th align="center">windspeed</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="center">19</td>
-<td align="center">13870</td>
-<td align="center">52</td>
-<td align="center">639</td>
-<td align="center">41</td>
-<td align="center">367</td>
-</tr>
-</tbody>
-</table>
-
-<table>
-<caption>Table continues below</caption>
-<colgroup>
-<col width="15%" />
-<col width="9%" />
-<col width="15%" />
-<col width="19%" />
-<col width="18%" />
-<col width="11%" />
-<col width="11%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th align="center">humidity</th>
-<th align="center">icon</th>
-<th align="center">dewpoint</th>
-<th align="center">windbearing</th>
-<th align="center">cloudcover</th>
-<th align="center">tempi</th>
-<th align="center">irri</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="center">85</td>
-<td align="center">7</td>
-<td align="center">634</td>
-<td align="center">360</td>
-<td align="center">101</td>
-<td align="center">522</td>
-<td align="center">236</td>
-</tr>
-</tbody>
-</table>
-
-<table>
-<caption>Table continues below</caption>
-<colgroup>
-<col width="15%" />
-<col width="16%" />
-<col width="15%" />
-<col width="15%" />
-<col width="18%" />
-<col width="18%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th align="center">pressurei</th>
-<th align="center">windspeedi</th>
-<th align="center">humidityi</th>
-<th align="center">dewpointi</th>
-<th align="center">windbearingi</th>
-<th align="center">cloudcoveri</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="center">47</td>
-<td align="center">126</td>
-<td align="center">409</td>
-<td align="center">183</td>
-<td align="center">514</td>
-<td align="center">393</td>
-</tr>
-</tbody>
-</table>
-
-<table>
-<caption>Table continues below</caption>
-<colgroup>
-<col width="9%" />
-<col width="14%" />
-<col width="13%" />
-<col width="16%" />
-<col width="14%" />
-<col width="10%" />
-<col width="10%" />
-<col width="10%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th align="center">dist</th>
-<th align="center">altitude</th>
-<th align="center">azimuth</th>
-<th align="center">altitudei</th>
-<th align="center">azimuthi</th>
-<th align="center">pcnm1</th>
-<th align="center">pcnm2</th>
-<th align="center">pcnm3</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="center">184</td>
-<td align="center">773</td>
-<td align="center">689</td>
-<td align="center">935</td>
-<td align="center">937</td>
-<td align="center">11</td>
-<td align="center">16</td>
-<td align="center">13</td>
-</tr>
-</tbody>
-</table>
-
-<table>
-<caption>Table continues below</caption>
-<colgroup>
-<col width="10%" />
-<col width="10%" />
-<col width="10%" />
-<col width="10%" />
-<col width="10%" />
-<col width="10%" />
-<col width="12%" />
-<col width="12%" />
-<col width="12%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th align="center">pcnm4</th>
-<th align="center">pcnm5</th>
-<th align="center">pcnm6</th>
-<th align="center">pcnm7</th>
-<th align="center">pcnm8</th>
-<th align="center">pcnm9</th>
-<th align="center">pcnm10</th>
-<th align="center">pcnm11</th>
-<th align="center">pcnm12</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="center">13</td>
-<td align="center">13</td>
-<td align="center">12</td>
-<td align="center">13</td>
-<td align="center">13</td>
-<td align="center">13</td>
-<td align="center">13</td>
-<td align="center">13</td>
-<td align="center">13</td>
-</tr>
-</tbody>
-</table>
-
-<table style="width:90%;">
-<colgroup>
-<col width="12%" />
-<col width="12%" />
-<col width="12%" />
-<col width="22%" />
-<col width="23%" />
-<col width="6%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th align="center">pcnm13</th>
-<th align="center">pcnm14</th>
-<th align="center">pcnm15</th>
-<th align="center">irr_pvgis_mod</th>
-<th align="center">irri_pvgis_mod</th>
-<th align="center">kwh</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="center">13</td>
-<td align="center">13</td>
-<td align="center">11</td>
-<td align="center">870</td>
-<td align="center">752</td>
-<td align="center">864</td>
-</tr>
-</tbody>
-</table>
-
-##### Rozkład wartości poszczególnych atrybutów
-
-``` r
-ggplot(data = melt(data), mapping = aes(x = value)) + 
+ggplot(data = melt(power_stations), mapping = aes(x = value)) + 
   geom_histogram(bins=50) + 
   labs(title = "Rozkład wartości atrybutów") + 
   facet_wrap(~variable, ncol=4, scales = 'free_x') + 
@@ -748,102 +256,71 @@ ggplot(data = melt(data), mapping = aes(x = value)) +
 
     ## Using data as id variables
 
-![](README_files/figure-markdown_github/unnamed-chunk-7-1.png)
-
-### Opis kolumn
-
-Dane są z ogniw fotowoltaicznych umieszczonych we Włoszech, to tłumaczy
-dlaczego część kolumn w pliku z danymi ma włoskie nazwy.  
-Zbiór danych opisany jest przy użyciu 51 kolumn.  
-Wszystkie kolumny poza kolumnami 'id', 'data' oraz 'anno' mają wartości
-liczbowe i są znormalizowane.
-
-id - identyfikator  
-idsito - id miejsca  
-idmodel - id modelu  
-idbrand - id marki
-
-idsito, idmodel i idbrand są znormalizowanymi identyfikatorami miejsca
-modelu i marki  
-liczba różnych wartości jakie przyjmują:
+![](README_files/figure-markdown_github/unnamed-chunk-1-1.png) 7. Liczba
+wartości 0 w kolumnach
 
 ``` r
-sapply(data[, names(data) %in% c('idsito', 'idmodel', 'idbrand')], function(x) length(unique(x)))
+sapply(power_stations, function(x) sum(x==0))
 ```
 
-    ##  idsito idmodel idbrand 
-    ##      17      11       6
+    ##                   id               idsito              idmodel 
+    ##                    0                13870                13870 
+    ##              idbrand                  lat                  lon 
+    ##                41610                    0                    0 
+    ##          ageinmonths                 anno                  day 
+    ##                69350                    0                  304 
+    ##                  ora                 data temperatura_ambiente 
+    ##                12410                    0                    0 
+    ##         irradiamento             pressure            windspeed 
+    ##                78489                32148                 1070 
+    ##             humidity                 icon             dewpoint 
+    ##                    0                45617                    0 
+    ##          windbearing           cloudcover                tempi 
+    ##                 2520                38394                    0 
+    ##                 irri            pressurei           windspeedi 
+    ##                    0               233263                    2 
+    ##            humidityi            dewpointi         windbearingi 
+    ##                    0                    0                    1 
+    ##          cloudcoveri                 dist             altitude 
+    ##                    1                  570                    0 
+    ##              azimuth            altitudei             azimuthi 
+    ##                    0                    1                    1 
+    ##                pcnm1                pcnm2                pcnm3 
+    ##                13870                13870                13870 
+    ##                pcnm4                pcnm5                pcnm6 
+    ##                13870                13870                13870 
+    ##                pcnm7                pcnm8                pcnm9 
+    ##                13870                13870                13870 
+    ##               pcnm10               pcnm11               pcnm12 
+    ##                13870                13870                13870 
+    ##               pcnm13               pcnm14               pcnm15 
+    ##                    0                13870                13870 
+    ##        irr_pvgis_mod       irri_pvgis_mod                  kwh 
+    ##                94008                    2                78521
 
-Jest 17 jednostek fotowoltaicznych z których są zebrane pomiary, każda z
-nich opisana jest marką i modelem oraz wiekiem w miesiącach idsito,
-idmodel, idbrand, lat, lon, ageinmonths - opisją ogniwa fotowoltaiczne.
-Wartości są znormalizowane
-
-lat - lattitude, szerokość geograficzna ogniwa fotowoltaicznego  
-lon - longitude, długość geograficzna ogniwa fotowoltaicznego  
-ageinmonths - wiek ogniwa fotowoltaicznego  
-anno - rok  
-day - dzien (przyjmuje 365 różnych wartości, więc wszystko się zgadza)  
-ora - teraz (0 dla godz. 2:00, rośnie do 1 dla godz 20:00 czyli końca
-pomiarów) data - data i czas w formacie MM/DD/YYYY HH:MM, od 1/2/2012
-2:00 do 12/31/2013 20:00  
-pomiary są zapisane od 2:00 do 20:00 - dlaczego? przecież latem słońce
-świeci dłużej  
-można uzyskać ilość energii wytworzonej w ciągu godziny poprzez
-grupowanie po dacie (suma wartości z kolumny kwh)  
-dlaczego jest 17 wpisów na jedną godzinę? "Każdy wiersz w zbiorze danych
-zawiera uśrednione informacje z jednej godziny pomiarów pojedynczej
-jednostki fotowoltaicznej" - dlatego, że jest w sumie 17 jednostek
-(idsito) temperatura\_ambiente - temperatura otoczenia, spodziewamy się,
-że to może wpływać na wytwarzaną ilość energii  
-irradiamento - promieniowanie, zera są możliwe - może być noc, ogniwo
-może być w cieniu  
-pressure - ciśnienie, tutaj nie powinno być wartości 0, uzupełnione
-będzie średnią  
-windspeed - prędkość wiatru, bardzo mało wartości zerowych, możliwe jest
-że nie było wiatru, zostawiamy wartości 0  
-humidity - wilgotność  
-icon - ikona ?  
-dewpoint - temperatura punktu rosy (znormalizowana)  
-windbearing - łożysko wiatrowe ?  
-cloud cover - zachmurzenie, może być zerowe, zostawiamy wartości 0  
-tempi -&gt; cloudcoveri - duplikacja kolumn temperatura\_ambiente -&gt;
-cloudcover tylko kolumny nazwane po włosku? - inne wartości, dodane 'i'
-na końcu - co oznacza ?  
-dist - distance ?  
-altitude - wysokość  
-azimuth - azymut  
-altitudei -&gt; azimuthi - odpowiedniki włoskie altitude i azimuth -
-inne wartości  
-pcnm1 -&gt; pcnm15 - jakieś pomiary z jakichś czujników, mają tyle samo
-zer ile idsito i idmodel (wyjątkiem jest pcnm13) co może wskazywać że są
-powiązane z czujnikami, odpowiednim ogniwom odpowiadają powtarzające się
-wartości  
-irr\_pvgis\_mod - ?  
-irri\_pvgis\_mod - ?  
-kwh - wytworzone Kilowatogodziny (wartości znormalizowane)
-
-### Brakujące wartości - ciągi 0 w różnych kolumnach, tylko pressure
+1.  Poprawienie klas kolumn
 
 ``` r
-data$pressure <- ifelse(data$pressure == 0, mean(data$pressure), data$pressure)
+# to factor
+# correlations doesn't work with not numeric
+# change_to_factor <- c('idsito', 'idmodel', 'idbrand', 'anno', 'day')
+# power_stations[, change_to_factor] <- lapply(power_stations[, change_to_factor], as.factor)
+# to date
+power_stations <- power_stations %>% mutate(date_year_month=format(as.POSIXct(data, format='%m/%d/%Y %H:%M'), "%Y-%m"))
+power_stations$data <- as.numeric(as.POSIXlt(power_stations$data, format="%m/%d/%Y %H:%M"))
 ```
 
-##### Przetworzenie daty na wartość liczbową
+1.  Uzupełnienie brakujących wartości
 
 ``` r
-data2 <- data
-data2$data <- as.numeric(as.POSIXct(data2$data, format="%m/%d/%Y %H:%M"))
+# pressure
+power_stations$pressure <- ifelse(power_stations$pressure == 0, mean(power_stations$pressure), power_stations$pressure)
 ```
 
 ### Korelacja między zmiennymi
 
-Odfiltrowanie daty, aby zostały same numeryczne wartości  
-Macierz korelacji jest symetryczna, więc dla czytelności usuwamy górny
-trójkąt
-
 ``` r
-correlations <- round(cor(data2), 2)
+correlations <- round(cor(power_stations), 2)
 correlations[upper.tri(correlations)] <- NA
 correlations_melt <- melt(correlations, na.rm = TRUE)
 
@@ -856,12 +333,11 @@ ggplot(data = correlations_melt, aes(Var1, Var2, fill = value)) +
   coord_fixed()
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-11-1.png)
-
-##### Kolejny wykres korelacji - tym razem tylko dla skorelowanych dodanio / ujmenie powyżej pewnego progu
+![](README_files/figure-markdown_github/unnamed-chunk-4-1.png) Korelacja
+między zmiennymi dla wartości bezwzględnej korelacji &gt; 0.5
 
 ``` r
-top_correlatinons <- correlations_melt %>% filter(abs(value) > 0.3, Var1 != Var2)
+top_correlatinons <- correlations_melt %>% filter(abs(value) > 0.5, Var1 != Var2)
 ggplot(data = top_correlatinons, aes(Var1, Var2, fill = value)) + 
   geom_tile(color = "white") + 
   labs(title = "Korelacja atrybutów powyżej progu korelacji", x = "Atrybuty", y = "Wartość korelacji") + 
@@ -871,9 +347,8 @@ ggplot(data = top_correlatinons, aes(Var1, Var2, fill = value)) +
   coord_fixed()
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-12-1.png)
-
-##### Kolejny wykres korelacji - korelacja atrybutów do kwh
+![](README_files/figure-markdown_github/unnamed-chunk-5-1.png) Wykres
+korelacji atrybutów do kwh
 
 ``` r
 kwh_correlations <- melt(correlations['kwh', ])
@@ -884,42 +359,36 @@ ggplot(data = kwh_correlations, mapping = aes(x=rownames(kwh_correlations), y=va
   theme_bw()
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-13-1.png)
+![](README_files/figure-markdown_github/unnamed-chunk-6-1.png)
 
-##### Wykres - zamiana energii w czasie i przestrzeni
-
-Zmiana daty na rok-miesiac
+### Wykres - zamiana energii w czasie i przestrzeni
 
 ``` r
-data <- data %>% 
-  rename(date=data) %>% 
-  mutate(date_year_month=format(as.POSIXct(date, format='%m/%d/%Y %H:%M'), "%Y-%m"))
-
-data2 <- data %>% group_by(date_year_month, idsito) %>% summarise(sum_kwh=sum(kwh))
-ggplot(data = data2, mapping = aes(x=date_year_month, y=sum_kwh, color=factor(idsito), group=factor(idsito))) + 
+energy_sito_date <- power_stations %>% group_by(date_year_month, idsito) %>% summarise(sum_kwh=sum(kwh))
+ggplot(data = energy_sito_date, mapping = aes(x=date_year_month, y=sum_kwh, color=factor(idsito), group=factor(idsito))) + 
   geom_line() +
   labs(title = "Wykres energii w czasie dla ogniw", x = "Data", y = "Suma wytworzonej energii[kwh]") +
   theme(axis.text.x = element_text(angle = 70, size = 8, vjust = 1, hjust = 1))
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-14-1.png)
+![](README_files/figure-markdown_github/unnamed-chunk-7-1.png)
 
-#### Regresor
+### Regresor
 
 ``` r
-data3 <- sample_n(data %>% select(idsito, irradiamento, kwh), 100)
-set.seed(23)
+power_stations_sample <- power_stations %>% select(idsito, irradiamento, kwh)
+set.seed(93)
 inTraining <- 
     createDataPartition(
         # atrybut do stratyfikacji
-        y = data3$idsito,
+        y = power_stations_sample$idsito,
         # procent w zbiorze uczącym
         p = .75,
         # chcemy indeksy a nie listę
         list = FALSE)
 
-training <- data3[ inTraining,]
-testing  <- data3[-inTraining,]
+training <- power_stations_sample[ inTraining,]
+testing  <- power_stations_sample[-inTraining,]
 
 ctrl <- trainControl(
     # powtórzona ocena krzyżowa
@@ -929,7 +398,7 @@ ctrl <- trainControl(
     # liczba powtórzeń
     repeats = 2)
 
-set.seed(23)
+set.seed(93)
 fit <- train(kwh ~ .,
              data = training,
              method = "rf",
@@ -961,16 +430,16 @@ fit
 
     ## Random Forest 
     ## 
-    ## 77 samples
-    ##  2 predictors
+    ## 176843 samples
+    ##      2 predictors
     ## 
     ## No pre-processing
     ## Resampling: Cross-Validated (2 fold, repeated 2 times) 
-    ## Summary of sample sizes: 39, 38, 38, 39 
+    ## Summary of sample sizes: 88421, 88422, 88421, 88422 
     ## Resampling results:
     ## 
     ##   RMSE       Rsquared   MAE       
-    ##   0.1192824  0.7105747  0.07198099
+    ##   0.1031765  0.7614288  0.05612153
     ## 
     ## Tuning parameter 'mtry' was held constant at a value of 2
 
@@ -981,4 +450,4 @@ defaultSummary(data.frame(pred = my_pred, obs = testing$kwh))
 ```
 
     ##       RMSE   Rsquared        MAE 
-    ## 0.22056890 0.34867237 0.09818333
+    ## 0.09988106 0.77467375 0.05394532
