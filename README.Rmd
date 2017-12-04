@@ -17,6 +17,7 @@ library(ggplot2)
 library(reshape2)
 library(caret)
 ```
+Zastosowanie bibliotek:  
 dplyr - do przetwarzania dataframe  
 ggplot2 - wykresy  
 reshape2 - funkcja melt  
@@ -69,7 +70,7 @@ ggplot(melt(lapply(power_stations[, !(names(power_stations) %in% c('id', 'data')
 ```{r fig.width=9, fig.height=18, cache=TRUE}
 ggplot(data = melt(power_stations), mapping = aes(x = value)) + 
   geom_histogram(bins=50) + 
-  labs(title = "Rozkład wartości atrybutów") + 
+  labs(title = "Rozkład wartości atrybutów", x = "", y = "") + 
   facet_wrap(~variable, ncol=4, scales = 'free_x') + 
   scale_x_continuous(labels = scales::comma) + 
   theme_bw()

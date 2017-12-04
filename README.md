@@ -24,6 +24,7 @@ library(reshape2)
 library(caret)
 ```
 
+Zastosowanie bibliotek:  
 dplyr - do przetwarzania dataframe  
 ggplot2 - wykresy  
 reshape2 - funkcja melt  
@@ -276,7 +277,7 @@ ggplot(melt(lapply(power_stations[, !(names(power_stations) %in% c('id', 'data')
 ``` r
 ggplot(data = melt(power_stations), mapping = aes(x = value)) + 
   geom_histogram(bins=50) + 
-  labs(title = "Rozkład wartości atrybutów") + 
+  labs(title = "Rozkład wartości atrybutów", x = "", y = "") + 
   facet_wrap(~variable, ncol=4, scales = 'free_x') + 
   scale_x_continuous(labels = scales::comma) + 
   theme_bw()
@@ -481,7 +482,7 @@ ggplot(data = energy_sito_date, mapping = aes(x=date_year_month, y=sum_kwh, colo
 ### Regresor
 
 ``` r
-power_stations_sample <- power_stations %>% select(idsito, irradiamento, irr_pvgis_mod, altitude, irri, tempi, kwh)
+power_stations_sample <- sample_n(power_stations %>% select(idsito, irradiamento, irr_pvgis_mod, altitude, irri, humidity, kwh), 10000)
 set.seed(93)
 inTraining <- 
     createDataPartition(
@@ -513,16 +514,16 @@ fit
     ## 
     ## No pre-processing
     ## Resampling: Cross-Validated (2 fold, repeated 2 times) 
-    ## Summary of sample sizes: 4252, 4251, 4251, 4252 
+    ## Summary of sample sizes: 4251, 4252, 4251, 4252 
     ## Resampling results across tuning parameters:
     ## 
     ##   mtry  RMSE        Rsquared   MAE       
-    ##   2     0.08289980  0.8469548  0.04338598
-    ##   4     0.08359839  0.8441908  0.04314739
-    ##   6     0.08441029  0.8411550  0.04332551
+    ##   2     0.08437924  0.8350559  0.04701773
+    ##   4     0.08418971  0.8356464  0.04618957
+    ##   6     0.08483365  0.8331416  0.04633323
     ## 
     ## RMSE was used to select the optimal model using  the smallest value.
-    ## The final value used for the model was mtry = 2.
+    ## The final value used for the model was mtry = 4.
 
 ``` r
 my_pred <- predict(fit, newdata = testing)
@@ -531,4 +532,4 @@ defaultSummary(data.frame(pred = my_pred, obs = testing$kwh))
 ```
 
     ##       RMSE   Rsquared        MAE 
-    ## 0.07329837 0.88047816 0.03887266
+    ## 0.07888085 0.86261810 0.04382253
