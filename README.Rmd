@@ -163,9 +163,9 @@ ggplot(data = correlations_melt, aes(Var1, Var2, fill = value)) +
   coord_fixed()
 ```
 
-#### 2. Wykres korelacji między zmiennymi dla wartości bezwzględnej korelacji > 0.5 z pominięciem korelacji zmiennej względem samej siebie
+#### 2. Wykres korelacji między zmiennymi dla wartości bezwzględnej korelacji > 0.4 z pominięciem korelacji zmiennej względem samej siebie
 ```{r fig.width=9, fig.height=9, cache=TRUE}
-top_correlatinons <- correlations_melt %>% filter(abs(value) > 0.5, Var1 != Var2)
+top_correlatinons <- correlations_melt %>% filter(abs(value) > 0.4, Var1 != Var2)
 ggplot(data = top_correlatinons, aes(Var1, Var2, fill = value)) + 
   geom_tile(color = "white") + 
   labs(title = "Korelacja atrybutów powyżej progu korelacji", x = "Atrybuty", y = "Wartość korelacji") + 
@@ -196,6 +196,7 @@ ggplot(data = energy_sito_date, mapping = aes(x=date_year_month, y=sum_kwh, colo
 ```
 
 ### Regresor
+Do utworzenia regresora użyte zostaną najbardziej skorelowane (pozytywnie lub negatywnie) atrybuty  
 ```{r regressor, cache=TRUE}
 power_stations_sample <- power_stations %>% select(idsito, irradiamento, irr_pvgis_mod, altitude, irri, tempi, kwh)
 set.seed(93)

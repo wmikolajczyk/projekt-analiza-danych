@@ -438,10 +438,10 @@ ggplot(data = correlations_melt, aes(Var1, Var2, fill = value)) +
 
 ![](README_files/figure-markdown_github/unnamed-chunk-4-1.png)
 
-#### 2. Wykres korelacji między zmiennymi dla wartości bezwzględnej korelacji &gt; 0.5 z pominięciem korelacji zmiennej względem samej siebie
+#### 2. Wykres korelacji między zmiennymi dla wartości bezwzględnej korelacji &gt; 0.4 z pominięciem korelacji zmiennej względem samej siebie
 
 ``` r
-top_correlatinons <- correlations_melt %>% filter(abs(value) > 0.5, Var1 != Var2)
+top_correlatinons <- correlations_melt %>% filter(abs(value) > 0.4, Var1 != Var2)
 ggplot(data = top_correlatinons, aes(Var1, Var2, fill = value)) + 
   geom_tile(color = "white") + 
   labs(title = "Korelacja atrybutów powyżej progu korelacji", x = "Atrybuty", y = "Wartość korelacji") + 
@@ -481,8 +481,11 @@ ggplot(data = energy_sito_date, mapping = aes(x=date_year_month, y=sum_kwh, colo
 
 ### Regresor
 
+Do utworzenia regresora użyte zostaną najbardziej skorelowane
+(pozytywnie lub negatywnie) atrybuty
+
 ``` r
-power_stations_sample <- sample_n(power_stations %>% select(idsito, irradiamento, irr_pvgis_mod, altitude, irri, humidity, kwh), 10000)
+power_stations_sample <- power_stations %>% select(idsito, irradiamento, irr_pvgis_mod, altitude, irri, tempi, kwh)
 set.seed(93)
 inTraining <- 
     createDataPartition(
@@ -509,21 +512,21 @@ fit
 
     ## Random Forest 
     ## 
-    ## 8503 samples
-    ##    6 predictors
+    ## 200422 samples
+    ##      6 predictors
     ## 
     ## No pre-processing
     ## Resampling: Cross-Validated (2 fold, repeated 2 times) 
-    ## Summary of sample sizes: 4251, 4252, 4251, 4252 
+    ## Summary of sample sizes: 100211, 100211, 100212, 100210 
     ## Resampling results across tuning parameters:
     ## 
     ##   mtry  RMSE        Rsquared   MAE       
-    ##   2     0.08437924  0.8350559  0.04701773
-    ##   4     0.08418971  0.8356464  0.04618957
-    ##   6     0.08483365  0.8331416  0.04633323
+    ##   2     0.06970211  0.8888622  0.03467843
+    ##   4     0.07002314  0.8877565  0.03414067
+    ##   6     0.07088916  0.8849391  0.03441209
     ## 
     ## RMSE was used to select the optimal model using  the smallest value.
-    ## The final value used for the model was mtry = 4.
+    ## The final value used for the model was mtry = 2.
 
 ``` r
 my_pred <- predict(fit, newdata = testing)
@@ -532,4 +535,4 @@ defaultSummary(data.frame(pred = my_pred, obs = testing$kwh))
 ```
 
     ##       RMSE   Rsquared        MAE 
-    ## 0.07888085 0.86261810 0.04382253
+    ## 0.06783002 0.89444675 0.03282992
