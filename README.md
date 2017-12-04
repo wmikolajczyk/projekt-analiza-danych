@@ -379,14 +379,14 @@ ggplot(data = energy_sito_date, mapping = aes(x=date_year_month, y=sum_kwh, colo
 ### Regresor
 
 ``` r
-power_stations_sample <- power_stations %>% select(idsito, irradiamento, kwh)
+power_stations_sample <- power_stations %>% select(idsito, irradiamento, irr_pvgis_mod, altitude, irri, tempi, kwh)
 set.seed(93)
 inTraining <- 
     createDataPartition(
         # atrybut do stratyfikacji
         y = power_stations_sample$idsito,
         # procent w zbiorze uczącym
-        p = .75,
+        p = .85,
         # chcemy indeksy a nie listę
         list = FALSE)
 
@@ -408,43 +408,26 @@ fit <- train(kwh ~ .,
              trControl = ctrl,
              # Paramter dla algorytmu uczącego
              ntree = 10)
-```
-
-    ## note: only 1 unique complexity parameters in default grid. Truncating the grid to 1 .
-
-    ## randomForest 4.6-12
-
-    ## Type rfNews() to see new features/changes/bug fixes.
-
-    ## 
-    ## Attaching package: 'randomForest'
-
-    ## The following object is masked from 'package:ggplot2':
-    ## 
-    ##     margin
-
-    ## The following object is masked from 'package:dplyr':
-    ## 
-    ##     combine
-
-``` r
 fit
 ```
 
     ## Random Forest 
     ## 
-    ## 176843 samples
-    ##      2 predictors
+    ## 8503 samples
+    ##    6 predictors
     ## 
     ## No pre-processing
     ## Resampling: Cross-Validated (2 fold, repeated 2 times) 
-    ## Summary of sample sizes: 88421, 88422, 88421, 88422 
-    ## Resampling results:
+    ## Summary of sample sizes: 4252, 4251, 4251, 4252 
+    ## Resampling results across tuning parameters:
     ## 
-    ##   RMSE       Rsquared   MAE       
-    ##   0.1031765  0.7614288  0.05612153
+    ##   mtry  RMSE        Rsquared   MAE       
+    ##   2     0.08532410  0.8377808  0.04481432
+    ##   4     0.08610073  0.8348743  0.04469126
+    ##   6     0.08659917  0.8331486  0.04461131
     ## 
-    ## Tuning parameter 'mtry' was held constant at a value of 2
+    ## RMSE was used to select the optimal model using  the smallest value.
+    ## The final value used for the model was mtry = 2.
 
 ``` r
 my_pred <- predict(fit, newdata = testing)
@@ -453,7 +436,7 @@ defaultSummary(data.frame(pred = my_pred, obs = testing$kwh))
 ```
 
     ##       RMSE   Rsquared        MAE 
-    ## 0.09988106 0.77467375 0.05394532
+    ## 0.07450777 0.87642730 0.03983031
 
 ### Opis kolumn - TODO: fix and move this section up
 

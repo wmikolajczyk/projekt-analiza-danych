@@ -122,14 +122,14 @@ ggplot(data = energy_sito_date, mapping = aes(x=date_year_month, y=sum_kwh, colo
 
 ### Regresor
 ```{r regressor, cache=TRUE}
-power_stations_sample <- power_stations %>% select(idsito, irradiamento, kwh)
+power_stations_sample <- power_stations %>% select(idsito, irradiamento, irr_pvgis_mod, altitude, irri, tempi, kwh)
 set.seed(93)
 inTraining <- 
     createDataPartition(
         # atrybut do stratyfikacji
         y = power_stations_sample$idsito,
         # procent w zbiorze uczącym
-        p = .75,
+        p = .85,
         # chcemy indeksy a nie listę
         list = FALSE)
 
