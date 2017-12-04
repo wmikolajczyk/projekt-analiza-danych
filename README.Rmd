@@ -20,12 +20,14 @@ library(dplyr)
 library(ggplot2)
 library(reshape2)
 library(caret)
+library(lubridate)
 ```
 Zastosowanie bibliotek:  
 dplyr - do przetwarzania dataframe  
 ggplot2 - wykresy  
 reshape2 - funkcja melt  
 caret - regresor  
+lubridate - funkcja month
 
 #### Wczytanie danych z pliku .csv
 ```{r load data, cache=TRUE}
@@ -127,6 +129,7 @@ Pierwsze kolumny opisują ogniwa ('idsito', 'idmodel', 'idbrand', 'lat', 'lon', 
 #### 1. Usunięcie niepotrzebnej kolumny id
 ```{r fix column types}
 power_stations <- power_stations[, !(names(power_stations) %in% c('id'))]
+power_stations <- power_stations %>% mutate(month=month(as.POSIXct(power_stations$data, format="%m/%d/%Y %H:%M")))
 ```
 #### 2. Uzupełnienie brakujących wartości
 ```{r}
@@ -197,7 +200,6 @@ ggplot(data = energy_sito_date, mapping = aes(x=date_year_month, y=sum_kwh, colo
 ```
 
 ### Regresor
-Do utworzenia regresora użyte zostaną najbardziej skorelowane atrybuty  
 ```{r regressor, cache=TRUE}
 power_stations_for_model <- sample_n(power_stations %>% select(idsito, irradiamento, irr_pvgis_mod, humidity, azimuthi, altitude, irri, tempi, ora, day, kwh), 50000)
 
@@ -236,5 +238,5 @@ my_pred <- predict(my_model, newdata = testing)
 defaultSummary(data.frame(pred = my_pred, obs = testing$kwh))
 ```
 
-Strojenie parametrów modelu odbyło się w oparciu o walidacyjny zbiór danych.
+Jako model wybrano Random Forest. Do utworzenia regresora zostały wykorzystane mocno skorelowane atrybuty z atrybutem wynikowym 'kwh'. Strojenie parametrów modelu odbyło się w oparciu o walidacyjny zbiór danych. Celem strojenia było uzyskanie jak najmniejszej wartości RMSE.
 

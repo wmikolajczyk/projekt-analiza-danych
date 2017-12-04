@@ -41,13 +41,15 @@ library(dplyr)
 library(ggplot2)
 library(reshape2)
 library(caret)
+library(lubridate)
 ```
 
 Zastosowanie bibliotek:  
 dplyr - do przetwarzania dataframe  
 ggplot2 - wykresy  
 reshape2 - funkcja melt  
-caret - regresor
+caret - regresor  
+lubridate - funkcja month
 
 #### Wczytanie danych z pliku .csv
 
@@ -405,6 +407,7 @@ fotowoltaicznych. Pierwsze kolumny opisują ogniwa ('idsito', 'idmodel',
 
 ``` r
 power_stations <- power_stations[, !(names(power_stations) %in% c('id'))]
+power_stations <- power_stations %>% mutate(month=month(as.POSIXct(power_stations$data, format="%m/%d/%Y %H:%M")))
 ```
 
 #### 2. Uzupełnienie brakujących wartości
@@ -483,6 +486,8 @@ ggplot(data = kwh_correlations, mapping = aes(x=rownames(kwh_correlations), y=va
   theme_bw()
 ```
 
+    ## Warning: Removed 1 rows containing missing values (position_stack).
+
 ![](README_files/figure-markdown_github/unnamed-chunk-6-1.png)
 
 ### Wykres - zmiana wytwarzanej energii przez ogniwa w czasie i przestrzeni
@@ -500,8 +505,6 @@ ggplot(data = energy_sito_date, mapping = aes(x=date_year_month, y=sum_kwh, colo
 
 ### Regresor
 
-Do utworzenia regresora użyte zostaną najbardziej skorelowane atrybuty
-
 ``` r
 power_stations_for_model <- sample_n(power_stations %>% select(idsito, irradiamento, irr_pvgis_mod, humidity, azimuthi, altitude, irri, tempi, ora, day, kwh), 50000)
 
@@ -516,7 +519,12 @@ training <- power_stations_for_model[ inTraining,]
 
 validation_testing <- power_stations_for_model[-inTraining,]
 validation_testing <- split(validation_testing, rep(c('validation', 'testing'), each=nrow(validation_testing)/2))
+```
 
+    ## Warning in split.default(x = seq_len(nrow(x)), f = f, drop = drop, ...):
+    ## data length is not a multiple of split variable
+
+``` r
 validation <- validation_testing$validation
 testing  <- validation_testing$testing
 
@@ -536,18 +544,18 @@ my_model
 
     ## Random Forest 
     ## 
-    ## 42502 samples
+    ## 42503 samples
     ##    10 predictors
     ## 
     ## No pre-processing
     ## Resampling: Cross-Validated (2 fold, repeated 2 times) 
-    ## Summary of sample sizes: 21251, 21251, 21252, 21250 
+    ## Summary of sample sizes: 21252, 21251, 21252, 21251 
     ## Resampling results across tuning parameters:
     ## 
     ##   mtry  RMSE        Rsquared   MAE       
-    ##    2    0.06820104  0.8931591  0.03585424
-    ##    6    0.06703653  0.8964805  0.03386853
-    ##   10    0.06799901  0.8933651  0.03413263
+    ##    2    0.06959389  0.8896546  0.03614580
+    ##    6    0.06850172  0.8928371  0.03442568
+    ##   10    0.06942115  0.8898588  0.03473377
     ## 
     ## RMSE was used to select the optimal model using  the smallest value.
     ## The final value used for the model was mtry = 6.
@@ -558,7 +566,7 @@ defaultSummary(data.frame(pred = my_pred, obs = validation$kwh))
 ```
 
     ##       RMSE   Rsquared        MAE 
-    ## 0.06941599 0.89134442 0.03253859
+    ## 0.06533809 0.90246021 0.03248373
 
 ``` r
 my_pred <- predict(my_model, newdata = testing)
@@ -566,7 +574,9 @@ defaultSummary(data.frame(pred = my_pred, obs = testing$kwh))
 ```
 
     ##       RMSE   Rsquared        MAE 
-    ## 0.06271518 0.90949902 0.03080102
+    ## 0.06261243 0.91494894 0.03206746
 
+Jako model wybrano Random Forest. Do utworzenia regresora zostały
+wykorzystane mocno skorelowane atrybuty z atrybutem wynikowym 'kwh'.
 Strojenie parametrów modelu odbyło się w oparciu o walidacyjny zbiór
-danych.
+danych. Celem strojenia było uzyskanie jak najmniejszej wartości RMSE.
