@@ -385,16 +385,10 @@ pressure - nie powinno być, chyba, że kodowanie?
 
 ### Przygotowanie danych
 
-#### 1. Poprawienie klas kolumn
+#### 1. Usunięcie niepotrzebnych kolumn
 
 ``` r
-# to factor
-# correlations doesn't work with not numeric
-# change_to_factor <- c('idsito', 'idmodel', 'idbrand', 'anno', 'day')
-# power_stations[, change_to_factor] <- lapply(power_stations[, change_to_factor], as.factor)
-# to date
-power_stations_for_cor <- power_stations
-power_stations_for_cor$data <- as.numeric(as.POSIXlt(power_stations$data, format="%m/%d/%Y %H:%M"))
+power_stations <- power_stations[, !(names(power_stations) %in% c('id'))]
 ```
 
 #### 2. Uzupełnienie brakujących wartości
@@ -402,7 +396,10 @@ power_stations_for_cor$data <- as.numeric(as.POSIXlt(power_stations$data, format
 ``` r
 # pressure
 power_stations$pressure <- ifelse(power_stations$pressure == 0, mean(power_stations$pressure), power_stations$pressure)
+# irradiamento based on kwh
 power_stations$irradiamento <- ifelse(power_stations$irradiamento == 0 & power_stations$kwh != 0, mean(power_stations$irradiamento), power_stations$irradiamento)
+# kwh based on irradiamento
+power_stations$kwh <- ifelse(power_stations$kwh == 0 & power_stations$irradiamento != 0, mean(power_stations$kwh), power_stations$kwh)
 ```
 
 ### Korelacja zmiennych
@@ -410,6 +407,9 @@ power_stations$irradiamento <- ifelse(power_stations$irradiamento == 0 & power_s
 #### 1. Wykres korelacji między zmiennymi
 
 ``` r
+power_stations_for_cor <- power_stations
+power_stations_for_cor$data <- as.numeric(as.POSIXlt(power_stations$data, format="%m/%d/%Y %H:%M"))
+
 correlations <- round(cor(power_stations_for_cor), 2)
 correlations[upper.tri(correlations)] <- NA
 correlations_melt <- melt(correlations, na.rm = TRUE)
