@@ -10,9 +10,9 @@ output:
 
 ### Podsumowanie analizy
 W analizowanym zbiorze danych pomimo dużej liczby atrybutów, tylko kilka z nich jest silnie skorelowanych z ilością wytwarzanej energii przez ogniwa fotowoltaiczne. Wszystkie wartości numeryczne są znormalizowane, przez co odczytanie i interpretacja wartości kolumn opisujących dni, czy godziny wymagało przejrzenia zmienności tych wartości w zbiorze oraz ich zależności względem innych kolumn.  
-Dane opisują pomiary z 17 ogniw fotowoltaicznych. Część pomiarów jest błędnie odczytana jako 0, możliwe, że z powodu awarii czujnika, lub przyczyn losowych. Najmocniej skorelowane są kolumny opisujące promieniowanie i ilość wytwarzanej energii przez ogniwa. W tych kolumnach wartości zerowe zostały uzupełnione w sposób bazujący na wartości drugiej skorelowanej kolumny.  
+Dane opisują pomiary z 17 ogniw fotowoltaicznych. Część pomiarów jest błędnie odczytana jako 0, możliwe, że z powodu awarii czujnika lub przyczyn losowych. Najsilniej skorelowane są kolumny opisujące promieniowanie i ilość wytwarzanej energii przez ogniwa. W tych kolumnach wartości zerowe zostały uzupełnione w sposób bazujący na wartości drugiej skorelowanej kolumny.  
 Na wykresie przedstawiającym ilość wytworzonej energii w osi czasu widać wyraźnie, że w miesiącach letnich wartości są wyraźnie wyższe niż w zimowych. Jest to zgodne z intuicyjnymi oczekiwaniami.  
-Jako regresor został wykorzystany model Random Forest operujący na danych okrojonych do najbardziej skorelowanych kolumn z kolumną 'kwh'. Zbiór danych został podzielony na treningowy, walidujący i testujący.
+Jako regresor został wykorzystany model Random Forest operujący na wybranych kolumnach ze zbioru danych. Zbiór danych został podzielony na treningowy, walidujący i testujący. Celem było osiągnięcie jak najmniejszej wartości RMSE przy przewidywaniu energii wytworzonej przez ogniwa fotowoltaiczne w ujęciu godzinowym.  
 
 ### Wykorzystane biblioteki
 ```{r load libraries, message=FALSE}
@@ -53,7 +53,7 @@ Prawie wszystkie wartości są wartościami liczbowymi, znormalizowanymi
 ```{r check NA}
 any(is.na(power_stations))
 ```
-Zbiór nie zawiera wartości NA, zatem nie będzie konieczne zwracanie na ich wystąpienie uwagi przy przetwarzaniu  
+Zbiór nie zawiera wartości NA, zatem nie będzie konieczne zwracanie uwagi na ich wystąpienie przy przetwarzaniu  
 
 #### 4. Typy kolumn  
 ```{r column types}
@@ -88,7 +88,7 @@ sapply(power_stations, function(x) sum(x==0))
 ```
 
 ### Opis danych
-Dane pochodzą z ogniw fotowoltaicznych umieszczonych we Włoszech. Opisane są przy użyciu 51 atrybutów, z czego część ma nazwy angielskie, część włoskie, a kilka z nich opisana jest skrótami.  
+Dane pochodzą z czujników ogniw fotowoltaicznych umieszczonych we Włoszech. Opisane są przy użyciu 51 atrybutów, z czego część ma nazwy angielskie, część włoskie, a kilka z nich opisana jest skrótami.  
 Wszystkie kolumny poza 'id', 'data' oraz 'anno' mają wartości liczbowe i są znormalizowane.
   
 Interpretacja kolumn:  
@@ -126,7 +126,7 @@ Na podstawie tego, że dla każdej godziny jest 17 pomiarów, można wywnioskowa
 Pierwsze kolumny opisują ogniwa ('idsito', 'idmodel', 'idbrand', 'lat', 'lon', 'ageinmonths').
 
 ### Przygotowanie danych
-#### 1. Usunięcie niepotrzebnej kolumny id
+#### 1. Usunięcie kolumny id, dodanie kolumny month
 ```{r fix column types}
 power_stations <- power_stations[, !(names(power_stations) %in% c('id'))]
 power_stations <- power_stations %>% mutate(month=month(as.POSIXct(power_stations$data, format="%m/%d/%Y %H:%M")))
