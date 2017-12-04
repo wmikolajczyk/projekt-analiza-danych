@@ -4,17 +4,16 @@ Wojciech Mikołajczyk
 December 2, 2017
 
 -   [TODO: podsumowanie analizy](#todo-podsumowanie-analizy)
-    -   [Wykorzystane biblioteki](#wykorzystane-biblioteki)
-    -   [Podsumowanie danych w zbiorze](#podsumowanie-danych-w-zbiorze)
-    -   [Korelacja między zmiennymi](#korelacja-między-zmiennymi)
-    -   [Wykres - zamiana energii w czasie i
-        przestrzeni](#wykres---zamiana-energii-w-czasie-i-przestrzeni)
-    -   [Regresor](#regresor)
-    -   [Opis kolumn - TODO: fix and move this section
-        up](#opis-kolumn---todo-fix-and-move-this-section-up)
+-   [Wykorzystane biblioteki](#wykorzystane-biblioteki)
+-   [Podsumowanie danych w zbiorze](#podsumowanie-danych-w-zbiorze)
+-   [Korelacja zmiennych](#korelacja-zmiennych)
+-   [Wykres - zmiana wytwarzanej energii przez ogniwa w czasie i
+    przestrzeni](#wykres---zmiana-wytwarzanej-energii-przez-ogniwa-w-czasie-i-przestrzeni)
+-   [Regresor](#regresor)
+-   [Opis kolumn - TODO: fix and move this section
+    up](#opis-kolumn---todo-fix-and-move-this-section-up)
 
-TODO: podsumowanie analizy
---------------------------
+### TODO: podsumowanie analizy
 
 ### Wykorzystane biblioteki
 
@@ -33,7 +32,7 @@ power_stations <- read.csv('elektrownie.csv')
 
 ### Podsumowanie danych w zbiorze
 
-1.  Rozmiar zbioru danych
+##### 1. Rozmiar zbioru danych
 
 ``` r
 dimensions <- dim(power_stations)
@@ -44,7 +43,7 @@ dimensions
     ## l. wierszy  l. kolumn 
     ##     235790         51
 
-1.  Podstawowe statystyki
+##### 2. Podstawowe statystyki
 
 ``` r
 summary(power_stations)
@@ -155,7 +154,7 @@ summary(power_stations)
     ##  Max.   :1.0000   Max.   :1.0000   Max.   : 1.0060   Max.   :1.0000  
     ## 
 
-1.  Sprawdzenie czy zbiór zawiera wartości NA
+##### 3. Sprawdzenie czy zbiór zawiera wartości NA
 
 ``` r
 any(is.na(power_stations))
@@ -163,7 +162,7 @@ any(is.na(power_stations))
 
     ## [1] FALSE
 
-1.  Typy kolumn
+##### 4. Typy kolumn
 
 ``` r
 sapply(power_stations, class)
@@ -204,7 +203,7 @@ sapply(power_stations, class)
     ##        irr_pvgis_mod       irri_pvgis_mod                  kwh 
     ##            "numeric"            "numeric"            "numeric"
 
-1.  Liczba różnych wartości w kolumnach
+##### 5. Liczba różnych wartości w kolumnach
 
 ``` r
 sapply(power_stations, function(x) length(unique(x)))
@@ -245,7 +244,7 @@ sapply(power_stations, function(x) length(unique(x)))
     ##        irr_pvgis_mod       irri_pvgis_mod                  kwh 
     ##                  870                  752                  864
 
-1.  Rozkład wartości poszczególnych atrybutów
+##### 6. Rozkład wartości poszczególnych atrybutów
 
 ``` r
 ggplot(data = melt(power_stations), mapping = aes(x = value)) + 
@@ -258,8 +257,9 @@ ggplot(data = melt(power_stations), mapping = aes(x = value)) +
 
     ## Using data as id variables
 
-![](README_files/figure-markdown_github/unnamed-chunk-1-1.png) 7. Liczba
-wartości 0 w kolumnach
+![](README_files/figure-markdown_github/unnamed-chunk-1-1.png)
+
+##### 7. Liczba wartości 0 w kolumnach
 
 ``` r
 sapply(power_stations, function(x) sum(x==0))
@@ -300,7 +300,7 @@ sapply(power_stations, function(x) sum(x==0))
     ##        irr_pvgis_mod       irri_pvgis_mod                  kwh 
     ##                94008                    2                78521
 
-1.  Poprawienie klas kolumn
+##### 8. Poprawienie klas kolumn
 
 ``` r
 # to factor
@@ -312,14 +312,16 @@ power_stations_for_cor <- power_stations
 power_stations_for_cor$data <- as.numeric(as.POSIXlt(power_stations$data, format="%m/%d/%Y %H:%M"))
 ```
 
-1.  Uzupełnienie brakujących wartości
+##### 9. Uzupełnienie brakujących wartości
 
 ``` r
 # pressure
 power_stations$pressure <- ifelse(power_stations$pressure == 0, mean(power_stations$pressure), power_stations$pressure)
 ```
 
-### Korelacja między zmiennymi
+### Korelacja zmiennych
+
+##### 1. Wykres korelacji między zmiennymi
 
 ``` r
 correlations <- round(cor(power_stations_for_cor), 2)
@@ -335,8 +337,9 @@ ggplot(data = correlations_melt, aes(Var1, Var2, fill = value)) +
   coord_fixed()
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-2-1.png) Korelacja
-między zmiennymi dla wartości bezwzględnej korelacji &gt; 0.5
+![](README_files/figure-markdown_github/unnamed-chunk-2-1.png)
+
+##### 2. Wykres korelacji między zmiennymi dla wartości bezwzględnej korelacji &gt; 0.5 z pominięciem korelacji zmiennej względem samej siebie
 
 ``` r
 top_correlatinons <- correlations_melt %>% filter(abs(value) > 0.5, Var1 != Var2)
@@ -349,8 +352,9 @@ ggplot(data = top_correlatinons, aes(Var1, Var2, fill = value)) +
   coord_fixed()
 ```
 
-![](README_files/figure-markdown_github/unnamed-chunk-3-1.png) Wykres
-korelacji atrybutów do kwh
+![](README_files/figure-markdown_github/unnamed-chunk-3-1.png)
+
+##### 3. Wykres korelacji atrybutów do kwh
 
 ``` r
 kwh_correlations <- melt(correlations['kwh', ])
@@ -363,7 +367,7 @@ ggplot(data = kwh_correlations, mapping = aes(x=rownames(kwh_correlations), y=va
 
 ![](README_files/figure-markdown_github/unnamed-chunk-4-1.png)
 
-### Wykres - zamiana energii w czasie i przestrzeni
+### Wykres - zmiana wytwarzanej energii przez ogniwa w czasie i przestrzeni
 
 ``` r
 power_stations <- power_stations %>% mutate(date_year_month=format(as.POSIXct(data, format='%m/%d/%Y %H:%M'), "%Y-%m"))
@@ -383,22 +387,16 @@ power_stations_sample <- power_stations %>% select(idsito, irradiamento, irr_pvg
 set.seed(93)
 inTraining <- 
     createDataPartition(
-        # atrybut do stratyfikacji
         y = power_stations_sample$idsito,
-        # procent w zbiorze uczącym
         p = .85,
-        # chcemy indeksy a nie listę
         list = FALSE)
 
 training <- power_stations_sample[ inTraining,]
 testing  <- power_stations_sample[-inTraining,]
 
 ctrl <- trainControl(
-    # powtórzona ocena krzyżowa
     method = "repeatedcv",
-    # liczba podziałów
     number = 2,
-    # liczba powtórzeń
     repeats = 2)
 
 set.seed(93)
@@ -406,8 +404,7 @@ fit <- train(kwh ~ .,
              data = training,
              method = "rf",
              trControl = ctrl,
-             # Paramter dla algorytmu uczącego
-             ntree = 10)
+             ntree = 25)
 fit
 ```
 
@@ -422,9 +419,9 @@ fit
     ## Resampling results across tuning parameters:
     ## 
     ##   mtry  RMSE        Rsquared   MAE       
-    ##   2     0.08532410  0.8377808  0.04481432
-    ##   4     0.08610073  0.8348743  0.04469126
-    ##   6     0.08659917  0.8331486  0.04461131
+    ##   2     0.08289980  0.8469548  0.04338598
+    ##   4     0.08359839  0.8441908  0.04314739
+    ##   6     0.08441029  0.8411550  0.04332551
     ## 
     ## RMSE was used to select the optimal model using  the smallest value.
     ## The final value used for the model was mtry = 2.
@@ -436,7 +433,7 @@ defaultSummary(data.frame(pred = my_pred, obs = testing$kwh))
 ```
 
     ##       RMSE   Rsquared        MAE 
-    ## 0.07450777 0.87642730 0.03983031
+    ## 0.07329837 0.88047816 0.03887266
 
 ### Opis kolumn - TODO: fix and move this section up
 
