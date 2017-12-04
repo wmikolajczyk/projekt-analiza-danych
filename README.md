@@ -903,3 +903,82 @@ ggplot(data = data2, mapping = aes(x=date_year_month, y=sum_kwh, color=factor(id
 ```
 
 ![](README_files/figure-markdown_github/unnamed-chunk-14-1.png)
+
+#### Regresor
+
+``` r
+data3 <- sample_n(data %>% select(idsito, irradiamento, kwh), 100)
+set.seed(23)
+inTraining <- 
+    createDataPartition(
+        # atrybut do stratyfikacji
+        y = data3$idsito,
+        # procent w zbiorze uczącym
+        p = .75,
+        # chcemy indeksy a nie listę
+        list = FALSE)
+
+training <- data3[ inTraining,]
+testing  <- data3[-inTraining,]
+
+ctrl <- trainControl(
+    # powtórzona ocena krzyżowa
+    method = "repeatedcv",
+    # liczba podziałów
+    number = 2,
+    # liczba powtórzeń
+    repeats = 2)
+
+set.seed(23)
+fit <- train(kwh ~ .,
+             data = training,
+             method = "rf",
+             trControl = ctrl,
+             # Paramter dla algorytmu uczącego
+             ntree = 10)
+```
+
+    ## note: only 1 unique complexity parameters in default grid. Truncating the grid to 1 .
+
+    ## randomForest 4.6-12
+
+    ## Type rfNews() to see new features/changes/bug fixes.
+
+    ## 
+    ## Attaching package: 'randomForest'
+
+    ## The following object is masked from 'package:ggplot2':
+    ## 
+    ##     margin
+
+    ## The following object is masked from 'package:dplyr':
+    ## 
+    ##     combine
+
+``` r
+fit
+```
+
+    ## Random Forest 
+    ## 
+    ## 77 samples
+    ##  2 predictors
+    ## 
+    ## No pre-processing
+    ## Resampling: Cross-Validated (2 fold, repeated 2 times) 
+    ## Summary of sample sizes: 39, 38, 38, 39 
+    ## Resampling results:
+    ## 
+    ##   RMSE       Rsquared   MAE       
+    ##   0.1192824  0.7105747  0.07198099
+    ## 
+    ## Tuning parameter 'mtry' was held constant at a value of 2
+
+``` r
+my_pred <- predict(fit, newdata = testing)
+
+defaultSummary(data.frame(pred = my_pred, obs = testing$kwh))
+```
+
+    ##       RMSE   Rsquared        MAE 
+    ## 0.22056890 0.34867237 0.09818333

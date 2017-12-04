@@ -184,3 +184,39 @@ ggplot(data = data2, mapping = aes(x=date_year_month, y=sum_kwh, color=factor(id
 ```
 
 
+#### Regresor
+```{r}
+data3 <- sample_n(data %>% select(idsito, irradiamento, kwh), 100)
+set.seed(23)
+inTraining <- 
+    createDataPartition(
+        # atrybut do stratyfikacji
+        y = data3$idsito,
+        # procent w zbiorze uczącym
+        p = .75,
+        # chcemy indeksy a nie listę
+        list = FALSE)
+
+training <- data3[ inTraining,]
+testing  <- data3[-inTraining,]
+
+ctrl <- trainControl(
+    # powtórzona ocena krzyżowa
+    method = "repeatedcv",
+    # liczba podziałów
+    number = 2,
+    # liczba powtórzeń
+    repeats = 2)
+
+set.seed(23)
+fit <- train(kwh ~ .,
+             data = training,
+             method = "rf",
+             trControl = ctrl,
+             # Paramter dla algorytmu uczącego
+             ntree = 10)
+fit
+my_pred <- predict(fit, newdata = testing)
+
+defaultSummary(data.frame(pred = my_pred, obs = testing$kwh))
+```
